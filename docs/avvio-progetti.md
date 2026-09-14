@@ -6,22 +6,44 @@
 
 I 4 repository vanno clonati **affiancati nella stessa cartella**: le demo trovano la libreria con un percorso relativo.
 
+| Cartella | GitHub (copia di riferimento) | Disco esterno |
+|---|---|---|
+| `pagAmico_CSharp_Lib` | `github.com/AdamoPrimeSoftware/pagAmicoCSharpLibrary` | `git-payprint-repos\pagAmico_CSharp_Lib.git` |
+| `pagAmico_CSharp_Demo` | `github.com/AdamoPrimeSoftware/pagAmicoCSharpDemo` | `git-payprint-repos\pagAmico_CSharp_Demo.git` |
+| `pagAmico_Kotlin_Lib` | `github.com/AdamoPrimeSoftware/pagAmicoKotlinLibrary` | `git-payprint-repos\pagAmico_Kotlin_Lib.git` |
+| `pagAmico_Kotlin_Demo` | `github.com/AdamoPrimeSoftware/pagAmicoKotlinDemo` | `git-payprint-repos\pagAmico_Kotlin_Demo.git` |
+
+Il disco esterno ha una lettera diversa secondo il PC: **G:** sul PC di casa, **E:** sul PC dell'ufficio.
+
 ```bash
-cd C:\Users\adamo\Desktop\Prime\payPrint
-git clone E:\git-payprint-repos\pagAmico_CSharp_Lib.git   pagAmico_CSharp_Lib
-git clone E:\git-payprint-repos\pagAmico_CSharp_Demo.git  pagAmico_CSharp_Demo
-git clone E:\git-payprint-repos\pagAmico_Kotlin_Lib.git   pagAmico_Kotlin_Lib
-git clone E:\git-payprint-repos\pagAmico_Kotlin_Demo.git  pagAmico_Kotlin_Demo
+cd D:\Programmazione\Prime\PerClaude\payPrint      # cartella sul PC di casa
+git clone https://github.com/AdamoPrimeSoftware/pagAmicoCSharpLibrary.git  pagAmico_CSharp_Lib
+git clone https://github.com/AdamoPrimeSoftware/pagAmicoCSharpDemo.git     pagAmico_CSharp_Demo
+git clone https://github.com/AdamoPrimeSoftware/pagAmicoKotlinLibrary.git  pagAmico_Kotlin_Lib
+git clone https://github.com/AdamoPrimeSoftware/pagAmicoKotlinDemo.git     pagAmico_Kotlin_Demo
+
+# disco esterno come secondo remote, per ogni repository (G: a casa, E: in ufficio)
+git -C pagAmico_CSharp_Lib remote add HardDiskEsterno G:\git-payprint-repos\pagAmico_CSharp_Lib.git
 ```
 
-I nomi delle cartelle devono restare questi.
+I nomi delle cartelle devono restare questi. Prima di iniziare a lavorare: `git pull`, perché si lavora
+sugli stessi repository da due PC. Dopo ogni commit: push su GitHub e sul disco esterno.
 
 ### Strumenti
 
 | Serve per | Cosa installare |
 |---|---|
 | C# | .NET SDK 8 (o successivo) + Visual Studio 2022 17.13 o successivo (per aprire i file `.slnx`) |
-| Kotlin | JDK 17 + IntelliJ IDEA. Gradle non va installato: si usa `gradlew` incluso |
+| Kotlin | JDK 17 (verificato con 17.0.14 e 17.0.20; il 17.0.8 non regola il keepalive TCP) + IntelliJ IDEA. Gradle non va installato: si usa `gradlew` incluso |
+
+Il JDK di Gradle si fissa una volta per PC in `%USERPROFILE%\.gradle\gradle.properties`, non nei
+repository (il percorso cambia da un PC all'altro):
+
+```
+org.gradle.java.home=C:\\Users\\adamo\\.jdks\\ms-17.0.20.1
+```
+
+In IntelliJ, *Settings → Build Tools → Gradle → Gradle JVM* sullo stesso JDK.
 | Prove senza macchina | **pagAmico Dev Kit** di PayPrint (`pagAmico-DevKit-Setup-1.0.0.exe`) |
 | Script in `docs/` e `strumenti/` | Python 3 |
 
@@ -89,7 +111,7 @@ Per la macchina reale sostituire `127.0.0.1` con il suo indirizzo (es. `192.168.
 
 | Configurazione | Cosa fa |
 |---|---|
-| **1 - Test offline (168)** | test di autoverifica, non serve nulla acceso |
+| **1 - Test offline** | 171 test di autoverifica, non serve nulla acceso |
 | **2 - Collaudo simulatore** | collaudo su `127.0.0.1:9100` (simulatore acceso) |
 | **4 - Collaudo macchina reale** | collaudo su `192.168.1.231:9100` |
 

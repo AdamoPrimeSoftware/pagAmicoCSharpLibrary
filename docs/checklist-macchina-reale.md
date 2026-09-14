@@ -95,7 +95,7 @@ Incasso aperto con denaro inserito. Chiudere il banco (o fermare il Tap), riapri
 
 Incasso aperto, staccare il cavo di rete del PC per 1 minuto, riattaccarlo.
 
-- **Guardare:** dopo quanto la libreria segnala la caduta (oggi keepalive di sistema: ore), stato della macchina.
+- **Guardare:** dopo quanto la libreria segnala la caduta (keepalive di default 10 s, poi sonde ogni 2 s, 5 sonde: attesa circa 20 s), stato della macchina.
 - **Decide:** i valori del keepalive TCP da impostare prima di togliere il timeout di 5 minuti.
 
 ## 11. Immagini e stampa diretta (domanda 9)

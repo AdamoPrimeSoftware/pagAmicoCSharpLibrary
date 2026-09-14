@@ -107,9 +107,9 @@ attese Kotlin alla caduta della connessione, che era l'altro prerequisito, è fa
 > `keepAliveRetryCount` (Kotlin), default **10 s, 2 s, 5 sonde**: una caduta si vede in circa 20 s.
 > La diagnostica dice alla connessione cosa è stato applicato. Limiti: in C# sui target
 > `netstandard2.0`/`net47` il numero di sonde resta quello di Windows (10); in Kotlin la regolazione
-> richiede una JVM che la supporti — **su Windows da JDK 17.0.18** (17.0.8 no, verificato) — e su
-> Android non è disponibile: resta il keepalive di sistema e la diagnostica lo segnala. Test offline
-> in entrambe le librerie (169 per parte). **Non ancora provato con un cavo staccato**: è la prova 10
+> richiede una JVM che la supporti — su Windows **17.0.14 e 17.0.20 sì, 17.0.8 no** (verificati) — e
+> su Android non è disponibile: resta il keepalive di sistema e la diagnostica lo segnala. Test
+> offline in entrambe le librerie (169 in C#, 171 in Kotlin). **Non ancora provato con un cavo staccato**: è la prova 10
 > di `checklist-macchina-reale.md`. Il timeout di 5 minuti resta finché quella prova non conferma.
 
 ### D3 — un testo qualsiasi chiude l'incasso
