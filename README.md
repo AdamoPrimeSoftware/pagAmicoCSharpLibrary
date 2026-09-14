@@ -26,6 +26,14 @@ dotnet test                                   # oppure Esplora test di Visual St
 dotnet run --project PayPrint.PagAmico.Tests  # stessi test, con l'elenco completo a video
 ```
 
+## Pacchetto NuGet
+
+```bash
+dotnet pack PayPrint.PagAmico -c Release -o artifacts
+```
+
+Produce `artifacts/PayPrint.PagAmico.1.0.0.nupkg` (net8.0, netstandard2.0, net47) e i simboli `.snupkg`. Per usarlo da un altro progetto si aggiunge la cartella come sorgente NuGet locale; per un csproj .NET Framework non-SDK (come Giano) basta la DLL in `lib/net47`. La versione si cambia in `<Version>` del csproj.
+
 ## Uso
 
 ```csharp

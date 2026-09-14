@@ -10,7 +10,19 @@
     <RootNamespace>PayPrint.PagAmico</RootNamespace>
     <AssemblyName>PayPrint.PagAmico</AssemblyName>
     <Description>Client TCP-IP per cassa rendiresto PayPrint pagAmico (protocollo rev. 2.33 / FW 8.72)</Description>
+
+    <!-- pacchetto NuGet: dotnet pack -c Release -o ..\artifacts -->
+    <PackageId>PayPrint.PagAmico</PackageId>
+    <Version>1.0.0</Version>
+    <PackageTags>pagamico;payprint;cassa;rendiresto</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <!--
     net8.0          usato dai banchi di prova e dai progetti nuovi
