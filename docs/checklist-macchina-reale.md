@@ -12,7 +12,8 @@ Scopo: chiudere in una sola sessione i punti che il simulatore non permette di v
 - [ ] Il PC raggiunge la macchina: `Test-NetConnection 192.168.1.231 -Port 9100`
 - [ ] Il **Tap** in mezzo, per avere il traffico grezzo con i tempi:
       `dotnet run --project PayPrint.PagAmico.Tap -- --listen 9200 --target 192.168.1.231:9100`
-      e nei programmi usare `127.0.0.1:9200`
+      e nei programmi usare `127.0.0.1:9200` (tranne la prova 10). Il Tap va lanciato in una console
+      interattiva (Visual Studio, profilo 3, o terminale): nella sua console si scrivono i comandi delle prove 6 e 9
 - [ ] Banco WinForms con **diagnostica libreria** e **registra su file** attivi
 - [ ] A fine sessione: copiare `%LOCALAPPDATA%\PayPrint.PagAmico\logs` e i log del Tap, poi
       `python strumenti\analizza_log.py`
@@ -65,9 +66,9 @@ Incasso di 10,00 €, inserire 4,00 €, **[AN]**.
 
 ## 6. `BUSY` e comandi durante l'incasso (domanda 4)
 
-Durante un incasso aperto, dal **Tap** o da un secondo client (la libreria blocca gli invii laterali), mandare `ST` e poi `DS`.
+Banco collegato attraverso il Tap. Durante un incasso aperto scrivere nella **console del Tap** `ST`, poi `DS`: partono chiusi da CR sulla stessa connessione del banco (la libreria invece blocca gli invii laterali). Le righe `T->M` del Tap sono i comandi mandati così.
 
-- **Guardare:** risposta testuale `BUSY`, `ER` con `E100`/`errorType 99`, oppure nulla.
+- **Guardare:** risposta testuale `BUSY`, `ER` con `E100`/`errorType 99`, oppure nulla. La risposta arriva anche al banco: deve finire fra i frame orfani e l'incasso deve restare aperto (è D3, sulla macchina vera).
 - **Decide:** se `PagAmicoFrame.IsBusy` riconosce la forma vera.
 
 ## 7. Chiusura forzata dal pannello (domanda 7)
@@ -86,16 +87,18 @@ Se possibile senza danni: incasso aperto e banconota inserita male o rifiutata.
 
 ## 9. Caduta di rete e riconnessione (domanda 6, punto 13)
 
-Incasso aperto con denaro inserito. Chiudere il banco (o fermare il Tap), riaprirlo e ricollegarsi **dallo stesso PC**. Inserire altro denaro.
+Incasso aperto con denaro inserito. Chiudere il banco (il Tap chiude anche la sua connessione verso la macchina), riaprirlo e ricollegarsi **dallo stesso PC** attraverso il Tap. Inserire altro denaro.
 
-- **Guardare:** i parziali e l'esito arrivano sul nuovo socket? `AN` e `CM` sul nuovo socket funzionano? Collegandosi da un altro PC durante l'incasso: rifiutato?
+- **Guardare:** i parziali e l'esito arrivano sul nuovo socket? Nel banco arrivano come frame orfani, perché la libreria non sa dell'incasso. Per chiudere sul nuovo socket scrivere `AN` (o `CM`) nella **console del Tap**: funziona? Collegandosi da un altro PC durante l'incasso: rifiutato?
 - **Decide:** la forma dell'API di ripresa di un incasso aperto.
 
 ## 10. Cavo staccato (domanda 8, D2)
 
-Incasso aperto, staccare il cavo di rete del PC per 1 minuto, riattaccarlo.
+Banco collegato **direttamente** a `192.168.1.231:9100`, **senza Tap**: con il Tap in mezzo la libreria parla con 127.0.0.1, che non cade mai, e vede la caduta solo quando il Tap chiude la sessione (keepalive del Tap, stessi valori). Diagnostica libreria accesa: alla connessione deve comparire `keepalive TCP: prima sonda dopo 10 s, poi ogni 2 s, caduta dopo 5 sonde`.
 
-- **Guardare:** dopo quanto la libreria segnala la caduta (keepalive di default 10 s, poi sonde ogni 2 s, 5 sonde: attesa circa 20 s), stato della macchina.
+Incasso aperto, staccare il cavo di rete **dal lato della macchina** (o fra switch e macchina) per 1 minuto, riattaccarlo. Staccando il cavo del PC, Windows può chiudere subito le connessioni al cambio di rete, e la prova non misurerebbe il keepalive.
+
+- **Guardare:** dopo quanto la libreria segnala la caduta (keepalive di default 10 s, poi sonde ogni 2 s, 5 sonde: attesa circa 20 s), stato della macchina. Ripetere con il banco Compose (Kotlin, JDK 17 aggiornato) per il keepalive della libreria Kotlin.
 - **Decide:** i valori del keepalive TCP da impostare prima di togliere il timeout di 5 minuti.
 
 ## 11. Immagini e stampa diretta (domanda 9)

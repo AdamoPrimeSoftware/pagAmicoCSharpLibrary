@@ -609,6 +609,14 @@ python strumenti/analizza_log.py --data 2026-09-03  di un giorno preciso
         "quello giusto, se dopo i pacchetti immagine serva il terminatore. Per i comandi il "
         "terminatore l'ha chiarito PayPrint: CR o CR+LF. Il profilo <b>2</b> aggiunge il dump "
         "esadecimale, indispensabile per l'invio delle immagini."))
+    s.append(P(
+        "Una riga scritta nella console del proxy (per esempio <font face='Courier'>ST</font>, oppure "
+        "<font face='Courier'>#2 ST</font> per la sessione 2) parte verso la macchina chiusa da CR, "
+        "sulla stessa connessione del client, e compare nel log come <font face='Courier'>T-&gt;M</font>. "
+        "Serve a mandare un comando a incasso aperto, cosa che la libreria blocca, e a chiudere con "
+        "<font face='Courier'>AN</font> o <font face='Courier'>CM</font> un incasso ripreso dopo una "
+        "riconnessione (prove 6 e 9 di <font face='Courier'>docs/checklist-macchina-reale.md</font>). "
+        "Verso la macchina il proxy regola il keepalive TCP come la libreria.", S_SMALL))
 
     s.append(PageBreak())
 
