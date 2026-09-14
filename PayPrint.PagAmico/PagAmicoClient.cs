@@ -91,6 +91,22 @@ public sealed class PagAmicoClient : IDisposable
     /// </summary>
     public TimeSpan MinimumCommandInterval { get; set; } = TimeSpan.FromMilliseconds(80);
 
+    /// <summary>
+    /// Silenzio dopo il quale parte la prima sonda keepalive TCP. Durante un incasso non si puo'
+    /// mandare [ST]: il keepalive e' l'unico modo di accorgersi che la macchina non e' piu' raggiungibile.
+    /// Il default di sistema e' 2 ore. Si applica alla connessione successiva.
+    /// </summary>
+    public TimeSpan KeepAliveTime { get; set; } = TimeSpan.FromSeconds(10);
+
+    /// <summary>Distanza fra due sonde keepalive senza risposta. Si applica alla connessione successiva.</summary>
+    public TimeSpan KeepAliveInterval { get; set; } = TimeSpan.FromSeconds(2);
+
+    /// <summary>
+    /// Sonde senza risposta prima di dichiarare caduta la connessione. Applicato solo su net8.0:
+    /// con netstandard2.0 / net47 Windows ne usa sempre 10. Si applica alla connessione successiva.
+    /// </summary>
+    public int KeepAliveRetryCount { get; set; } = 5;
+
     public ImagePacketLayout ImageLayout { get; set; } = ImagePacketLayout.Documented;
 
     public bool IsConnected => _tcp?.Connected == true && _stream is not null;
@@ -152,7 +168,7 @@ public sealed class PagAmicoClient : IDisposable
             throw;
         }
 
-        tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+        ConfigureKeepAlive(tcp.Client);
         _tcp = tcp;
         _stream = tcp.GetStream();
         _parser.Clear();
@@ -161,6 +177,34 @@ public sealed class PagAmicoClient : IDisposable
 
         T($"connesso a {Host}:{Port} (pausa minima fra invii {MinimumCommandInterval.TotalMilliseconds:0} ms, " +
           $"terminatore {(CommandTerminator.Length == 0 ? "nessuno" : "presente")})");
+    }
+
+    private void ConfigureKeepAlive(Socket socket)
+    {
+        socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+        var time = Math.Max(1, (int)KeepAliveTime.TotalSeconds);
+        var interval = Math.Max(1, (int)KeepAliveInterval.TotalSeconds);
+        try
+        {
+#if NET8_0_OR_GREATER
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, time);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, interval);
+            socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, Math.Max(1, KeepAliveRetryCount));
+            T($"keepalive TCP: prima sonda dopo {time} s, poi ogni {interval} s, caduta dopo {KeepAliveRetryCount} sonde senza risposta");
+#else
+            // SIO_KEEPALIVE_VALS: acceso, tempo e intervallo in millisecondi. Solo Windows.
+            var values = new byte[12];
+            BitConverter.GetBytes(1u).CopyTo(values, 0);
+            BitConverter.GetBytes((uint)time * 1000).CopyTo(values, 4);
+            BitConverter.GetBytes((uint)interval * 1000).CopyTo(values, 8);
+            socket.IOControl(IOControlCode.KeepAliveValues, values, null);
+            T($"keepalive TCP: prima sonda dopo {time} s, poi ogni {interval} s (sonde prima della caduta: default di Windows)");
+#endif
+        }
+        catch (Exception ex) when (ex is SocketException or PlatformNotSupportedException or NotSupportedException)
+        {
+            T($"keepalive TCP con i valori di sistema: regolazione non supportata ({ex.Message})");
+        }
     }
 
     public void Disconnect()

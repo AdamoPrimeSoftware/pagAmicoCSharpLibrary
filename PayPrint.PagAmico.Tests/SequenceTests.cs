@@ -50,6 +50,7 @@ internal static class SequenceTests
         await LastJsonAcceptsAnything();
         await DefaultPauseBetweenCommands();
         await TerminatorAppended();
+        await KeepAliveConfigured();
         await ImagePackets();
     }
 
@@ -519,6 +520,20 @@ internal static class SequenceTests
             "pausa di default: due invii consecutivi arrivano ad almeno 70 ms");
         Program.Check(segments.Count == 2 && Encoding.UTF8.GetString(segments[1].Data) == "DS\r",
             "default: ogni comando arriva nel suo segmento, chiuso da CR");
+    }
+
+    private static async Task KeepAliveConfigured()
+    {
+        using var fake = new FakePagAmico();
+        using var client = new PagAmicoClient("127.0.0.1", fake.Port) { KeepAliveTime = TimeSpan.FromSeconds(7), KeepAliveInterval = TimeSpan.FromSeconds(3), KeepAliveRetryCount = 4 };
+        var trace = new List<string>();
+        client.Trace = m => { lock (trace) trace.Add(m); };
+        await client.ConnectAsync();
+        fake.WaitConnected();
+        string[] lines;
+        lock (trace) lines = trace.ToArray();
+        Program.Check(Array.Exists(lines, l => l.Contains("prima sonda dopo 7 s, poi ogni 3 s") && l.Contains("4 sonde")),
+            "keepalive TCP regolato alla connessione (7 s, ogni 3 s, 4 sonde)");
     }
 
     private static async Task TerminatorAppended()
