@@ -223,6 +223,11 @@ stessi nomi; i test offline passano da 121 a **168 per parte**, i collaudi resta
 10. **Prova «raffica»** — due comandi in una sola scrittura, con e senza CR. Oggi senza
     terminatore il secondo si perde.
 
+> **Aggiornamento del 14 settembre.** **Punti 9 e 10 fatti.** Default del terminatore a CR nelle
+> due librerie e nei due banchi; collaudo 64/64 con CR sia a 80 ms sia a 0 ms, in C# e in Kotlin.
+> La raffica non perde più comandi sul simulatore attuale, **nemmeno senza terminatore**: il
+> difetto non si riproduce. Dettagli in `prova-terminatore-cr-2026-09-14.md`.
+
 **Con una macchina vera** (quella di Viglione da remoto, o la nostra):
 
 11. **Pausa** — resta configurabile; il default passa da 80 ms a 0 solo quando la raffica con CR
