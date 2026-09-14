@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;netstandard2.0;net47</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <RootNamespace>PayPrint.PagAmico</RootNamespace>
+    <AssemblyName>PayPrint.PagAmico</AssemblyName>
+    <Description>Client TCP-IP per cassa rendiresto PayPrint pagAmico (protocollo rev. 2.33 / FW 8.72)</Description>
+  </PropertyGroup>
+
+  <!--
+    net8.0          usato dai banchi di prova e dai progetti nuovi
+    net47           usato da Giano/Neo (WPF su .NET Framework 4.7, csproj legacy)
+    netstandard2.0  per qualsiasi altro consumatore
+
+    System.Text.Json serve solo ai due target legacy; la versione e' allineata a quella
+    gia' presente in Giano, per non introdurre nuovi binding redirect.
+  -->
+  <ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
+    <PackageReference Include="System.Text.Json" Version="10.0.2" />
+  </ItemGroup>
+
+  <!-- l'orologio del registro su file e' sostituibile solo dai test -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="PayPrint.PagAmico.Tests" />
+  </ItemGroup>
+
+</Project>
+

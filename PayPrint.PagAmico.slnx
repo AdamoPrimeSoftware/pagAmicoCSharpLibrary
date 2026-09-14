@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="PayPrint.PagAmico.Tests/PayPrint.PagAmico.Tests.csproj" />
+  <Project Path="PayPrint.PagAmico/PayPrint.PagAmico.csproj" />
+</Solution>
