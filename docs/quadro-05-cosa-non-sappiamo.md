@@ -86,8 +86,8 @@ implicito), il terzo cade del tutto:
 **Per il comando di stato la risposta è no.** Ci servirebbe come battito cardiaco, per sapere che il
 box è vivo, ma durante un incasso non va mandato: il fornitore dice che verrebbe ignorato, e che
 `ST` va usato solo a transazione conclusa o annullata. È una regola del dispositivo, non solo della
-nostra coda. Durante l'incasso l'unico segnale di vita è il keepalive TCP, che oggi va ancora
-regolato (vedi D2 nell'esito).
+nostra coda. Durante l'incasso l'unico segnale di vita è il keepalive TCP, regolato dal 14
+settembre a circa 20 s ma non ancora provato con un cavo staccato (vedi D2 nell'esito).
 
 ### 1.2 Che campi arrivano nella risposta di annullo?
 

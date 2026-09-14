@@ -141,9 +141,10 @@ l'altro. E su quella base fa due analisi mirate:
    Il messaggio, scritto così nel codice, vale per quello che si è osservato: il simulatore, con
    comandi senza terminatore. Per il fornitore basta che ogni comando termini con CR o CR+LF
    (domande 1.1 e 1.2, vedi `esito-risposta-payprint.md`): a quel punto anche due comandi nello
-   stesso segmento dovrebbero passare. Va provato, sul simulatore e poi sulla macchina. Il CR si
-   imposta dal banco, scrivendo `\r` nella casella del terminatore, oggi vuota. In quella prova
-   l'avviso rosso compare lo stesso — il proxy toglie CR e LF solo agli estremi del segmento — e
+   stesso segmento dovrebbero passare. Sul simulatore è provato dal 14 settembre, e passa anche
+   senza terminatore (`prova-terminatore-cr-2026-09-14.md`); sulla macchina va ancora provato. Il
+   CR è il default delle librerie, e nei banchi la casella del terminatore parte con `\r`. Con il
+   CR l'avviso rosso compare lo stesso — il proxy toglie CR e LF solo agli estremi del segmento — e
    fa fede solo la risposta al secondo comando.
 2. **Comandi troppo ravvicinati.** Sotto i trenta millisecondi segnala il rischio anche se i
    comandi erano in due segmenti distinti. Quella soglia è misurata, non stimata, ma sul
@@ -224,7 +225,10 @@ il primo controllo della giornata: se fallisce qui, non ha senso collegarsi.
 Non usano nessun framework di test: sono un normale programma con tre primitive scritte a mano.
 Scelta coerente col resto — zero dipendenze, si lancia e basta.
 
-### Che cosa verificano i 168 test
+### Che cosa verificano i test (169 in C#, 171 in Kotlin)
+
+Dove i numeri differiscono, il primo è C# e il secondo Kotlin: i due test in più di Kotlin non
+hanno ancora il gemello in C#.
 
 | Sezione | Asserzioni | Che cosa verifica |
 |---|---:|---|
@@ -233,9 +237,9 @@ Scelta coerente col resto — zero dipendenze, si lancia e basta.
 | **Risposta JSON** | 21 | la mappatura del JSON di esempio, le giacenze per taglio, e le **incoerenze del firmware**: un nome di campo con un refuso, uno abbreviato, uno con uno spazio iniziale |
 | **Stampa** | 16 | undici comandi contro il manuale, la struttura di uno scontrino, la decodifica dello stato stampante |
 | **Display** | 9 | i comandi contro gli esempi del manuale, il JSON compatto delle liste e il limite di caratteri |
-| **Sequenze di incasso** | 52 | dall'11 settembre: il client vero contro un finto pagAmico su 127.0.0.1. `OK p BUSY p IN`, `OK CMD ERROR IN`, `BUSY` e `ER E100/99` prima dell'`OK`, `CM/OK` seguito dal `CM` finale, `CM/NO`, `CM` prima dell'`OK`, una sola chiusura per incasso, annullo del chiamante prima e dopo l'`OK`, invii bloccati a incasso aperto, frame orfani, `PO`/`IM`/`I2`, chiusura forzata dal pannello, timeout, caduta e `Disconnect()` a incasso aperto, caduta mentre il `CM` aspetta l'`OK` |
-| **Comandi semplici e invio** | 10 | un `CM` in ritardo non fa da risposta a `ST`; `OK`, testo di errore e `LO`; la pausa di 80 ms con la configurazione di default; il terminatore; i due incapsulamenti delle immagini, byte per byte |
-| **Registro su file** | 7 | due scrittori sullo stesso file, cambio di giorno, due logger avviati in giorni diversi, ripulitura dei caratteri di controllo, troncamento, logger spento |
+| **Sequenze di incasso** | 52 / 53 | dall'11 settembre: il client vero contro un finto pagAmico su 127.0.0.1. `OK p BUSY p IN`, `OK CMD ERROR IN`, `BUSY` e `ER E100/99` prima dell'`OK`, `CM/OK` seguito dal `CM` finale, `CM/NO`, `CM` prima dell'`OK`, una sola chiusura per incasso, annullo del chiamante prima e dopo l'`OK`, invii bloccati a incasso aperto, frame orfani, `PO`/`IM`/`I2`, chiusura forzata dal pannello, timeout, caduta e `Disconnect()` a incasso aperto, caduta mentre il `CM` aspetta l'`OK`; solo Kotlin: l'esito `AN` arriva anche con l'eccezione di cancellazione del chiamante |
+| **Comandi semplici e invio** | 11 | un `CM` in ritardo non fa da risposta a `ST`; `OK`, testo di errore e `LO`; la pausa di 80 ms e il CR con la configurazione di default; il terminatore CR+LF; i due incapsulamenti delle immagini, byte per byte; il keepalive TCP regolato alla connessione |
+| **Registro su file** | 7 / 8 | due scrittori sullo stesso file, cambio di giorno, due logger avviati in giorni diversi, ripulitura dei caratteri di controllo, troncamento, logger spento; solo Kotlin: tre processi veri sullo stesso file |
 | **Errori e display** | 13 | il comando `DI`, le descrizioni dei codici, la stringa di stato, il riconoscimento di `BUSY` |
 
 ### Che cosa NON coprono
@@ -248,18 +252,20 @@ Scelta coerente col resto — zero dipendenze, si lancia e basta.
   due comandi chiusi da CR senza pausa si vede solo su una macchina vera. E il finto pagAmico
   risponde con le sequenze che conosciamo dal simulatore e dal manuale: quelle della macchina vera
   restano da vedere.
-- **Il registro su file fra processi veri.** I test usano due logger nello stesso processo: per il
-  mutex con nome di C# è lo stesso meccanismo, per l'append di Kotlin quasi certamente anche, ma
-  due processi separati non sono stati provati.
+- **Il registro su file fra processi veri, in C#.** Kotlin dal 14 settembre ha un lock fra processi
+  e un test con tre processi separati sullo stesso file. In C# i test usano due logger nello stesso
+  processo: per il mutex con nome è lo stesso meccanismo, ma due processi separati non sono provati.
+- **Il keepalive con un cavo staccato.** I test verificano i valori applicati al socket, non dopo
+  quanto una caduta vera viene vista: è la prova 10 di `checklist-macchina-reale.md`.
 - **Quali incapsulamenti delle immagini accetta la macchina**: i test verificano i byte che
   partono, non chi li capisce. Poi quasi tutti i codici di errore del manuale, e i programmi di
   prova stessi.
 
 > **In sintesi.** Gli 86 test sui manuali coprono bene **la traduzione fra i manuali e le
 > stringhe** — comandi in uscita, JSON in entrata — e il framing, che sono le due cose in cui è
-> facile sbagliare in silenzio. I 62 contro il finto pagAmico coprono lo **stato dell'incasso**,
-> dove stavano D1 e D3, e i comandi semplici; i 20 sul registro e sugli errori il resto della
-> libreria. Quello che resta al collaudo, e alla macchina vera, è il comportamento del dispositivo.
+> facile sbagliare in silenzio. I 63 (64 in Kotlin) contro il finto pagAmico coprono lo **stato
+> dell'incasso**, dove stavano D1 e D3, e i comandi semplici; i 20 (21) sul registro e sugli
+> errori il resto della libreria. Quello che resta al collaudo, e alla macchina vera, è il comportamento del dispositivo.
 
 ---
 
@@ -307,8 +313,8 @@ Produce un rapporto per file, con sei controlli:
 2. **Comandi inviati troppo ravvicinati** — fino alla risposta di PayPrint il difetto numero
    uno del progetto, trovato a posteriori nel log senza dover rifare la prova. Per il fornitore,
    sulla macchina e con il CR o CR+LF, la pausa non serve: il controllo conta per le sessioni senza
-   terminatore, che oggi sono tutte, e con il CR finché la raffica non regge, prima sul simulatore
-   e poi sulla macchina.
+   terminatore (tutte quelle fino al 14 settembre) e, con il CR ormai di default, finché la raffica
+   non regge sulla macchina: sul simulatore regge.
 3. **Risposte di errore**, col codice tradotto in italiano.
 4. **Stato delle scorte**, decodificando la stringa di stato cifra per cifra: è il campo che dice
    se la macchina sta per non riuscire più a dare il resto.

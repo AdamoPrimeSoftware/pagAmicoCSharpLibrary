@@ -209,9 +209,9 @@ minima fra comandi, la connessione persistente da riaprire a mano. Dopo la rispo
 si sono rivelati limiti della libreria, e sono corretti dall'11 settembre: `CM` e `AN` a incasso
 aperto passano per una via laterale invece di mettersi in coda dietro l'`IN`, e il predicato — il
 difetto D3 di `esito-risposta-payprint.md` — lavora in due fasi. La pausa, per il fornitore, non serve se
-i comandi terminano con CR o CR+LF; ma oggi la libreria non manda terminatore, e la pausa resta
-finché il CR non è provato sul simulatore e una raffica di comandi con CR non regge su una macchina
-vera. E se la rete cade a incasso aperto, la
+i comandi terminano con CR o CR+LF; dal 14 settembre la libreria chiude ogni comando con CR,
+provato sul simulatore, e la pausa resta finché una raffica di comandi con CR non regge su una
+macchina vera. E se la rete cade a incasso aperto, la
 macchina accetta la riconnessione dallo stesso IP — se poi l'esito arrivi sul nuovo socket, non si
 sa ancora.
 
@@ -224,7 +224,7 @@ aggiunta di contante e sono cumulativi. La condizione è caduta: l'adattatore si
 La tabella lascia comunque il blocco C a 3 – 5 giornate: la risposta toglie l'incognita che
 bloccava il disegno, ma aggiunge lavoro nella nostra libreria, che nessun blocco della tabella
 comprende e che va stimato a parte. I due limiti qui sopra e i difetti D1 e D3 sono fatti (11
-settembre); resta D2 — per cui serve prima il keepalive regolato — e il resto è elencato in ordine
+settembre); resta D2 — il keepalive regolato c'è dal 14 settembre, manca la prova del cavo staccato — e il resto è elencato in ordine
 nel §3 di `esito-risposta-payprint.md`. Alcune risposte che servono all'adattatore (quanti frame seguono un
 `CM`, che cosa porta un `AN` con denaro dentro, che cosa arriva sul nuovo socket dopo una
 riconnessione) aspettano ancora la telefonata: sono nel §5 dello stesso documento.

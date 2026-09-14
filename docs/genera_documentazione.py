@@ -329,8 +329,8 @@ def story():
         ["Protocollo", "PayPrint pagAmico, TCP-IP rev. 2.33 - firmware 8.72"],
         ["Documenti di base", "Manuale Lista comandi TCP-IP 2.33; Integrazione display 1.2; "
                               "Protocollo di stampa 2.00; Note di rilascio FW 8.72; Guida pagAmico Dev Kit 1.0"],
-        ["Stato della verifica", "168 test offline e 64 passi di collaudo sul simulatore, superati "
-                                 "in entrambi i linguaggi (11 settembre 2026)"],
+        ["Stato della verifica", "test offline superati: 169 in C#, 171 in Kotlin; 64 passi di collaudo "
+                                 "sul simulatore in entrambi i linguaggi (14 settembre 2026)"],
     ], [95, CONTENT_W - 95], header=False))
 
     s.append(Spacer(1, 10 * mm))
@@ -358,8 +358,8 @@ def story():
         ["PayPrint.PagAmico", "la libreria: nessuna dipendenza esterna, solo <font face='Courier'>System.Text.Json</font>. "
                               "Compila per net8.0, netstandard2.0 e net47"],
         ["PayPrint.PagAmico.WinForms", "banco di prova con tutti i comandi, pannello del traffico e finestra di log"],
-        ["PayPrint.PagAmico.Tests", "168 test offline: 86 confrontano le stringhe generate con gli esempi dei "
-                                    "manuali, 62 fanno parlare il client con un finto pagAmico locale, 20 provano "
+        ["PayPrint.PagAmico.Tests", "169 test offline: 86 confrontano le stringhe generate con gli esempi dei "
+                                    "manuali, 63 fanno parlare il client con un finto pagAmico locale, 20 provano "
                                     "il registro su file e gli errori"],
         ["PayPrint.PagAmico.LiveTest", "collaudo end-to-end: 64 passi in 13 gruppi di default (71 in 15, accendendo la sonda DI e i riavvii), contro simulatore o macchina reale"],
         ["PayPrint.PagAmico.Tap", "proxy TCP che registra il traffico fra un client qualsiasi e la macchina"],
@@ -371,7 +371,8 @@ def story():
     s.append(P("Lato Kotlin", S_H2))
     s.append(table([
         ["Modulo", "Ruolo"],
-        ["pagamico-lib", "la libreria (coroutine + kotlinx-serialization), gli stessi 168 test offline e "
+        ["pagamico-lib", "la libreria (coroutine + kotlinx-serialization), gli stessi test offline (171: "
+                         "due in piu', annullo del chiamante e tre processi sullo stesso file) e "
                          "lo stesso collaudo a 64 passi"],
         ["pagamico-desktop", "banco di prova Compose for Desktop, gemello di quello WinForms"],
     ], [150, CONTENT_W - 150]))
@@ -397,7 +398,7 @@ def story():
     s.append(table([
         ["Aspetto", "Come funziona"],
         ["Comando", "stringa ASCII a lunghezza fissa, chiusa da CR o CR+LF secondo PayPrint (il manuale "
-                    "non lo dice e i suoi esempi ne sono privi; le librerie oggi inviano senza): "
+                    "non lo dice e i suoi esempi ne sono privi; le librerie mandano CR per default): "
                     "<font face='Courier'>IN001050</font> chiede un incasso di 10,50 euro"],
         ["Importi in richiesta", "<b>centesimi</b>, con un numero di cifre fisso per comando "
                                  "(6 per <font face='Courier'>IN</font>, 10 per <font face='Courier'>PA</font>)"],
@@ -423,10 +424,11 @@ def story():
                      "<b>un solo comando</b>: due comandi trasmessi a distanza quasi nulla vengono letti "
                      "insieme e il secondo viene ignorato, senza alcuna risposta e senza errore. "
                      "Misurato sul simulatore: a 0 ms il comando si perde, a 30 ms passa. "
-                     "Le librerie, che oggi inviano senza terminatore, impongono percio' una distanza "
-                     "minima fra gli invii, 80 ms per default. PayPrint dice la pausa non necessaria con "
-                     "il terminatore: resta come rete di sicurezza finche' la prova col CR non la rende "
-                     "superflua (<font face='Courier'>docs/esito-risposta-payprint.md</font>).", WARN))
+                     "Le librerie chiudono ogni comando con <b>CR</b> per default (dal 14 settembre) e "
+                     "impongono ancora una distanza minima fra gli invii, 80 ms per default. PayPrint "
+                     "dice la pausa non necessaria con il terminatore, e sul simulatore attuale la raffica "
+                     "regge: resta come rete di sicurezza finche' la stessa prova non regge sulla macchina "
+                     "(<font face='Courier'>docs/prova-terminatore-cr-2026-09-14.md</font>).", WARN))
 
     s.append(PageBreak())
 
@@ -570,8 +572,8 @@ def story():
             (0, 1, "PTSTAT", "call"),
             (1, 0, '{"response":"OK","errorType":"00000000"}', "reply"),
         ], row=20), "Dopo: con la distanza minima fra invii il simulatore risponde regolarmente. Il rimedio "
-                    "indicato da PayPrint e' il terminatore CR o CR+LF: la pausa resta come rete di "
-                    "sicurezza finche' non e' provato."))
+                    "indicato da PayPrint e' il terminatore CR o CR+LF, default CR dal 14 settembre: la "
+                    "pausa resta come rete di sicurezza finche' non e' provato sulla macchina."))
 
     s.append(PageBreak())
 
@@ -672,7 +674,8 @@ esito.amountUnpaid?.takeIf { it.signum() > 0 }?.let {
     s.append(Spacer(1, 4))
     s.append(P("Una sessione vista dalla diagnostica:", S_SMALL))
     s.append(code("""
-..  connesso a 127.0.0.1:9100 (pausa minima fra invii 80 ms, terminatore nessuno)
+..  keepalive TCP: prima sonda dopo 10 s, poi ogni 2 s, caduta dopo 5 sonde senza risposta
+..  connesso a 127.0.0.1:9100 (pausa minima fra invii 80 ms, terminatore presente)
 ..  attesa di 80 ms prima dell'invio: il pagAmico ignora i comandi troppo ravvicinati
 ..  in attesa dell'esito di 'ST' (timeout 15s)
 ..  letti 1076 byte dal socket
@@ -965,8 +968,8 @@ esito.amountUnpaid?.takeIf { it.signum() > 0 }?.let {
         ["comandi inviati troppo ravvicinati",
          "sul simulatore, senza terminatore, il secondo veniva ignorato senza risposta; l'attesa "
          "scadeva dopo 15 o 45 secondi",
-         "distanza minima fra invii, 80 ms per default. PayPrint indica il terminatore CR o CR+LF, "
-         "senza pause: la pausa resta come rete di sicurezza finche' non e' provato"],
+         "distanza minima fra invii, 80 ms per default, e dal 14 settembre terminatore CR come indica "
+         "PayPrint: la pausa resta come rete di sicurezza finche' non e' provata sulla macchina"],
         ["Kotlin: cancellazione confusa con timeout",
          "annullando un incasso il comando <font face='Courier'>AN</font> non partiva e la macchina "
          "restava occupata per i comandi successivi",
@@ -990,14 +993,14 @@ esito.amountUnpaid?.takeIf { it.signum() > 0 }?.let {
         ["Punto", "Situazione"],
         ["distanza minima fra comandi", "chiarita in parte: per PayPrint nessuna pausa e' necessaria se i "
                                         "comandi terminano con CR o CR+LF, e il simulatore <i>probabilmente "
-                                        "ha qualche difficolta'</i>. Gli 80 ms sono una misura empirica sul "
-                                        "simulatore senza terminatore e restano come rete di sicurezza "
-                                        "finche' una raffica con CR non regge sulla macchina"],
+                                        "ha qualche difficolta'</i>. Sul simulatore attuale, il 14 settembre, "
+                                        "la raffica regge con e senza CR. Gli 80 ms restano come rete di "
+                                        "sicurezza finche' una raffica con CR non regge sulla macchina"],
         ["terminatore dei comandi", "chiuso per la macchina: CR o CR+LF, dice PayPrint. Il manuale non lo "
-                                    "nomina e i suoi esempi ne sono privi (pp. 12, 15, 43, 66). Il client "
-                                    "oggi invia senza terminatore e il simulatore accetta; l'opzione per "
-                                    "aggiungere CR/LF c'e', il default va portato a CR dopo averlo provato "
-                                    "sul simulatore"],
+                                    "nomina e i suoi esempi ne sono privi (pp. 12, 15, 43, 66). Provato "
+                                    "sul simulatore, dal 14 settembre il client chiude ogni comando con "
+                                    "CR per default. Resta da chiedere se il CR serve dopo i pacchetti "
+                                    "immagine e con <font face='Courier'>PTPRDT</font>"],
         ["comando DI", "assente dai manuali. Il Dev Kit ne mostra un esempio a dodici campi, molto piu' "
                        "ricco dei sette che inviamo: da confermare sulla macchina vera, il simulatore "
                        "accetta entrambi"],
@@ -1063,7 +1066,7 @@ esito.amountUnpaid?.takeIf { it.signum() > 0 }?.let {
                      "PayPrint e osservare che cosa manda la loro applicazione, comprese le pause che "
                      "tiene fra un comando e l'altro - non tutti pero': le causali dei movimenti e la "
                      "stampa di immagini restano aperte anche dopo, mentre terminatore e pause li ha "
-                     "chiariti PayPrint e sul simulatore restano da provare. Degli ultimi sei, quattro "
+                     "chiariti PayPrint e sul simulatore sono provati; sulla macchina no. Degli ultimi sei, quattro "
                      "hanno ora una risposta scritta del fornitore e <font face='Courier'>amountPaid</font> "
                      "lo definisce il manuale; quello che resta richiede una macchina vera, "
                      "perche' riguarda che cosa fa il dispositivo in condizioni che il simulatore non "

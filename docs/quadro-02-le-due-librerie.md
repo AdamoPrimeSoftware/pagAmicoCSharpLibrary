@@ -81,8 +81,8 @@ Due casi speciali che si scoprono solo sul campo:
 
 ### 1.3 Due comandi di fila, e il secondo sparisce
 
-**Il problema.** Senza terminatore — ed è così che le librerie inviano oggi — il pagAmico legge il
-buffer del socket e lo interpreta come **un solo** comando. Se ne scrivi due a raffica finiscono
+**Il problema.** Senza terminatore — ed è così che le librerie inviavano fino al 14 settembre — il
+pagAmico legge il buffer del socket e lo interpreta come **un solo** comando. Se ne scrivi due a raffica finiscono
 nello stesso segmento TCP e il secondo viene ignorato — senza errore, senza risposta, senza niente.
 
 **Che cosa succede senza.** Il caso classico: chiudi la finestra sul display e subito dopo lanci
@@ -97,11 +97,12 @@ default tiene un margine.*
 
 > **! Questo era il difetto numero uno del progetto**, e la prima domanda a PayPrint (1.1 della mail,
 > col terminatore alla 1.2). La risposta dell'11 settembre: **nessuna pausa serve, basta che ogni
-> comando termini con CR o CR+LF**; il simulatore «probabilmente ha qualche difficoltà». Le
-> librerie il terminatore lo prevedono già, ma di default lo lasciano vuoto, perché il manuale 2.33
-> non lo nomina mai. Gli 80 ms, **misura empirica sul simulatore** e non minimo garantito dal
-> firmware, restano come rete di sicurezza finché la prova a raffica con CR non regge, prima sul
-> simulatore e poi su una macchina vera: l'ordine di lavoro è in `esito-risposta-payprint.md`.
+> comando termini con CR o CR+LF**; il simulatore «probabilmente ha qualche difficoltà». Dal 14
+> settembre il terminatore di default è **CR**, nelle due librerie e nei due banchi, anche se il
+> manuale 2.33 non lo nomina mai. Sul simulatore la raffica regge ormai con e senza CR
+> (`prova-terminatore-cr-2026-09-14.md`). Gli 80 ms, **misura empirica sul simulatore** e non
+> minimo garantito dal firmware, restano come rete di sicurezza finché la raffica con CR non regge
+> su una macchina vera: l'ordine di lavoro è in `esito-risposta-payprint.md`.
 
 ### 1.4 Centesimi in andata, euro al ritorno
 
@@ -209,7 +210,8 @@ Questa è la sezione che vale la lettura. Sono i vincoli che un'applicazione sco
   dopo `IN` la macchina non ne ha. Se scade, la libreria smette di attendere senza mandare `AN`:
   l'incasso **resta aperto** sulla macchina, il cliente può continuare a inserire denaro, e la
   libreria non lo sa e non lo compensa (difetto D2 in `esito-risposta-payprint.md`). Toglierlo non
-  è una riga: prima serve il keepalive TCP regolato.
+  è una riga: serviva il keepalive TCP regolato, che dal 14 settembre c'è (10 s, 2 s, 5 sonde:
+  una caduta si vede in circa 20 s), e serve ancora la prova del cavo staccato su una macchina vera.
 
 ### Sui parametri
 
@@ -384,7 +386,8 @@ Il testo completo di queste cinque domande sta nella **mail a PayPrint**
 (`mail-payprint-domande-protocollo.md`). Nel primo messaggio ne partono però solo due — la
 distanza minima fra due comandi e il terminatore, domande 1.1 e 1.2 — e l'11 settembre hanno avuto
 risposta: sulla macchina i comandi vanno chiusi con CR o CR+LF, e col terminatore la pausa non
-serve; sul simulatore resta da provare (`esito-risposta-payprint.md`). Le due che riguardano
+serve; sul simulatore il CR è stato provato il 14 settembre ed è diventato il default
+(`prova-terminatore-cr-2026-09-14.md`). Le due che riguardano
 display e immagini — il formato di `DI` e l'incapsulamento di `SF`/`SI` — all'innesto in Giano
 non servono e sono state
 messe da parte per un secondo giro (sezione A della mail); i tipi di codice a barre stanno con

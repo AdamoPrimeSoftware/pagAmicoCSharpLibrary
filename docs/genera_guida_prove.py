@@ -119,7 +119,7 @@ def story():
     s.append(table([
         ["Progetto", "A che serve", "Si avvia?"],
         ["PayPrint.PagAmico", "la libreria", "no, e' una libreria"],
-        ["PayPrint.PagAmico.Tests", "168 test offline, solo 127.0.0.1", "si, nessun argomento"],
+        ["PayPrint.PagAmico.Tests", "169 test offline, solo 127.0.0.1", "si, nessun argomento"],
         ["PayPrint.PagAmico.WinForms", "il banco di prova", "si, nessun argomento"],
         ["PayPrint.PagAmico.LiveTest", "collaudo automatico, 64 passi", "si, 7 profili"],
         ["PayPrint.PagAmico.Fill", "riempie le giacenze del simulatore", "si, 4 profili"],
@@ -187,7 +187,7 @@ def story():
 
     s.append(table([
         ["Configurazione", "Che cosa lancia"],
-        ["1 - Test offline (168)", "i 168 test offline della libreria Kotlin"],
+        ["1 - Test offline", "i 171 test offline della libreria Kotlin"],
         ["2 - Collaudo simulatore", "i 64 passi contro 127.0.0.1:9100"],
         ["3 - Banco di prova (Compose)", "l'applicazione desktop con tutti i comandi"],
         ["4 - Collaudo macchina reale", "i 64 passi contro 192.168.1.231:9100"],
@@ -223,9 +223,9 @@ def story():
         ["", "Che cosa fare", "Atteso"],
         [VS, "tasto destro su <b>PayPrint.PagAmico.Tests</b>, <b>Imposta come progetto di avvio</b>, "
              "poi <b>Ctrl+F5</b> (senza debug, cosi' la finestra resta aperta)",
-         "<font face='Courier'>168 test superati, 0 falliti</font>"],
-        [IJ, "configurazione <b>1 - Test offline (168)</b>, tasto verde",
-         "lo stesso conteggio nella finestra <i>Run</i>"],
+         "<font face='Courier'>169 test superati, 0 falliti</font>"],
+        [IJ, "configurazione <b>1 - Test offline</b>, tasto verde",
+         "<font face='Courier'>171 test superati, 0 falliti</font> nella finestra <i>Run</i>"],
     ], [70, 210, CONTENT_W - 280]))
 
     s.append(P(
@@ -404,9 +404,9 @@ OK    [P2] P2 erogazione taglio scelto   erogate 1 banconote da 10 EUR
         "scrivono IP e porta a mano e si preme <b>Connetti</b>."))
     s.append(P(
         "Sempre in questa scheda ci sono le due opzioni di protocollo: il <b>terminatore comandi</b> "
-        "(vuoto = nessuno, verificato solo sul simulatore. PayPrint chiede CR o CR+LF, nella casella "
-        "<font face='Courier'>\\r</font> o <font face='Courier'>\\r\\n</font>: sulla macchina va "
-        "messo, sul simulatore e' ancora da provare) e la <b>password</b> richiesta dai "
+        "(parte con <font face='Courier'>\\r</font>, cioe' CR, come chiede PayPrint e come il default "
+        "delle librerie dal 14 settembre; <font face='Courier'>\\r\\n</font> per CR+LF, vuoto per "
+        "nessuno) e la <b>password</b> richiesta dai "
         "comandi che muovono denaro (<font face='Courier'>PA, P2, PM, M2, MF, BT, AF, AZ</font>)."))
 
     s.append(P("7.2 Le nove schede", S_H2))
@@ -519,7 +519,8 @@ python strumenti/analizza_log.py --data 2026-09-03  di un giorno preciso
 
     s.append(P("8.3 Che cosa si vede con la diagnostica accesa", S_H2))
     s.append(code("""
-..  connesso a 127.0.0.1:9100 (pausa minima fra invii 80 ms, terminatore nessuno)
+..  keepalive TCP: prima sonda dopo 10 s, poi ogni 2 s, caduta dopo 5 sonde senza risposta
+..  connesso a 127.0.0.1:9100 (pausa minima fra invii 80 ms, terminatore presente)
 ..  attesa di 80 ms prima dell'invio: il pagAmico ignora i comandi troppo ravvicinati
 ..  in attesa dell'esito di 'ST' (timeout 15s)
 ..  letti 1076 byte dal socket
@@ -530,9 +531,9 @@ python strumenti/analizza_log.py --data 2026-09-03  di un giorno preciso
         "Le righe che contano sono le ultime due <b>quando non compaiono</b>. Se la traccia si ferma su "
         "<i>in attesa</i> e poi dice <i>attesa scaduta</i> senza aver letto un solo byte, il comando "
         "non e' mai arrivato alla macchina: il problema non e' nell'interpretazione della risposta ma "
-        "nell'invio. Le prime due righe sono quelle della libreria di oggi, senza terminatore e con "
-        "80 ms di pausa: PayPrint dice che con CR o CR+LF la pausa non serve, e finche' non e' "
-        "provato resta come rete di sicurezza."))
+        "nell'invio. Le prime righe dicono i valori applicati alla connessione: keepalive TCP, CR "
+        "come terminatore e 80 ms di pausa. PayPrint dice che con CR o CR+LF la pausa non serve; "
+        "finche' non e' provato sulla macchina resta come rete di sicurezza."))
     s.append(P(
         "Nei programmi da riga di comando (collaudo, demo) la diagnostica e' sempre accesa e compare "
         "nella finestra di output dell'IDE, con il prefisso <font face='Courier'>..</font>.", S_SMALL))
@@ -593,7 +594,8 @@ python strumenti/analizza_log.py --data 2026-09-03  di un giorno preciso
     s.append(P(
         "L'ultima riga e' la prova del difetto: la macchina, qui il simulatore, non ha risposto affatto "
         "a comandi mandati senza terminatore. PayPrint attribuisce il fenomeno al simulatore e dice "
-        "che con CR o CR+LF la pausa non serve: e' ancora da provare. A fine sessione il "
+        "che con CR o CR+LF la pausa non serve; sul simulatore attuale, il 14 settembre, la raffica "
+        "e' passata con e senza CR, sulla macchina e' ancora da provare. A fine sessione il "
         "proxy calcola minimo, media e massimo sia delle pause del client sia dei tempi di risposta "
         "della macchina.", S_SMALL))
 
@@ -640,7 +642,7 @@ python strumenti/analizza_log.py --data 2026-09-03  di un giorno preciso
          "accendere la <b>diagnostica libreria</b>: se dice <i>attesa scaduta</i> senza aver letto "
          "byte, e' questo. Oppure mettere il proxy in mezzo e cercare la riga "
          "<font face='Courier'>ATTENZIONE</font>. Il rimedio indicato da PayPrint e' il terminatore "
-         "CR (capitolo 7.1), ancora da provare"],
+         "CR, default dal 14 settembre: controllare che la casella del capitolo 7.1 non sia vuota"],
         ["Nessuna risposta, ma il comando e' corretto",
          "e' uno dei comandi che per protocollo non rispondono",
          "<font face='Courier'>CL, DS, DC, QA, CO, DT, DG, TS</font> non prevedono risposta. "
@@ -690,8 +692,8 @@ python strumenti/analizza_log.py --data 2026-09-03  di un giorno preciso
     ], [18, 100, 190, CONTENT_W - 308]))
 
     s.append(P(
-        "Atteso al termine: <b>168 su 168</b> offline e <b>64 su 64</b> di collaudo, in entrambi i "
-        "linguaggi.", S_SMALL))
+        "Atteso al termine: <b>169 su 169</b> offline in C# e <b>171 su 171</b> in Kotlin, "
+        "<b>64 su 64</b> di collaudo in entrambi i linguaggi.", S_SMALL))
 
     # ---------------------------------------------------------------- 12
     s.append(P("12. Il giorno in cui arriva la macchina", S_H1))
@@ -711,11 +713,11 @@ python strumenti/analizza_log.py --data 2026-09-03  di un giorno preciso
          "<b>mai</b>. Il contante lo carica l'operatore, con una sessione di ricarica"],
         ["gruppo riavvii", "escluso di default",
          "escluso, salvo prova voluta: riavvia POS e macchina"],
-        ["terminatore", "nessuno; CR e' ancora da provare",
+        ["terminatore", "<b>CR</b>, default dal 14 settembre, provato",
          "<b>CR</b> (o CR+LF), come chiede PayPrint"],
-        ["pausa fra comandi", "80 ms, misura empirica",
+        ["pausa fra comandi", "80 ms; con CR regge anche a 0 ms",
          "PayPrint la dice non necessaria con il terminatore CR o CR+LF. Resta a 80 ms come rete "
-         "di sicurezza finche' non e' provato"],
+         "di sicurezza finche' non e' provato (<font face='Courier'>--pausa 0</font>)"],
     ], [72, 118, CONTENT_W - 190]))
 
     s.append(callout("Le prime tre cose da fare sulla macchina vera",
@@ -724,11 +726,11 @@ python strumenti/analizza_log.py --data 2026-09-03  di un giorno preciso
                      "qualsiasi prova successiva. "
                      "2. Cominciare dal profilo <b>7</b>, solo il gruppo "
                      "<font face='Courier'>base</font>, non dal collaudo completo. "
-                     "3. Mettere il terminatore <b>CR</b> che chiede PayPrint (nei banchi "
-                     "<font face='Courier'>\\r</font> nella casella del capitolo 7.1; il collaudo "
-                     "oggi non ha l'opzione). Gli 80 ms di pausa restano come rete di sicurezza "
-                     "finche' la prova <i>raffica</i> di "
-                     "<font face='Courier'>docs/esito-risposta-payprint.md</font> non mostra che con "
+                     "3. Controllare il terminatore <b>CR</b> che chiede PayPrint: e' il default "
+                     "delle librerie, nei banchi <font face='Courier'>\\r</font> nella casella del "
+                     "capitolo 7.1, nel collaudo <font face='Courier'>--terminatore cr</font>. Gli 80 "
+                     "ms di pausa restano come rete di sicurezza finche' la prova 2 di "
+                     "<font face='Courier'>docs/checklist-macchina-reale.md</font> non mostra che con "
                      "CR i comandi passano anche senza; il valore sta in una sola proprieta' "
                      "(<font face='Courier'>MinimumCommandInterval</font> in C#, "
                      "<font face='Courier'>minimumCommandIntervalMs</font> in Kotlin).", GOOD))

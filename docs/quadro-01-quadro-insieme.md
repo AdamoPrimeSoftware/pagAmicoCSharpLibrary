@@ -42,9 +42,8 @@ Il punto è che quel protocollo, visto da un'applicazione, non è una conversazi
 - i nomi dei campi cambiano fra una versione di firmware e l'altra;
 - e se mandi due comandi troppo ravvicinati il secondo viene ignorato **senza dire niente** —
   almeno sul simulatore, con i comandi senza terminatore. Per il fornitore, con CR o CR+LF non
-  serve nessuna pausa. Le librerie però oggi mandano i comandi senza terminatore: il CR diventa il
-  default solo dopo averlo provato sul simulatore, e la pausa di 80 ms resta finché la raffica con
-  CR non regge su una macchina vera.
+  serve nessuna pausa. Dal 14 settembre le librerie chiudono ogni comando con CR, provato sul
+  simulatore; la pausa di 80 ms resta finché la raffica con CR non regge su una macchina vera.
 
 E soprattutto: **non esisteva niente da usare**. Nei quattro manuali di PayPrint l'unico
 esempio di codice è uno *snippet* Python di venti righe per l'invio di un'immagine; l'unico
@@ -92,8 +91,8 @@ dispositivo vero, più una quinta guida che in diversi punti disambigua i quattr
 Alle 15:49 la prima sessione contro il simulatore. Alle 15:55 le prime due sessioni del proxy di
 analisi — ed è lì che salta fuori il primo difetto vero, l'avviso *"comando inviato solo 1 ms dopo
 il precedente"*. Il fornitore, nella risposta dell'11 settembre, dirà che nessuna pausa serve se i
-comandi terminano con CR o CR+LF, e che *"il simulatore probabilmente ha qualche difficoltà"*: sul
-simulatore resta da provare.
+comandi terminano con CR o CR+LF, e che *"il simulatore probabilmente ha qualche difficoltà"*. Il 14
+settembre, sul simulatore attuale, la raffica regge con e senza CR, e il CR diventa il default.
 
 Nel giro di poche ore nascono il banco di prova, il collaudo automatico, il proxy, il programma di
 riempimento, e la prima generazione della documentazione. I due client grandi — il cuore delle
@@ -241,10 +240,12 @@ Più circa 1.200 righe di documentazione in Markdown e due manuali PDF generati.
 
 ### Lo stato della verifica
 
-- **168 test offline** superati in entrambi i linguaggi: 86 confrontano le stringhe generate con
-  gli esempi letterali dei manuali, carattere per carattere; 62 fanno parlare il client vero con un
-  finto pagAmico su 127.0.0.1 (sequenze di incasso, comandi semplici, invio); 20 provano il
-  registro su file e il vocabolario degli errori.
+- **Test offline** tutti superati: **169 in C#, 171 in Kotlin**. 86 confrontano le stringhe
+  generate con gli esempi letterali dei manuali, carattere per carattere; 63 in C# e 64 in Kotlin
+  fanno parlare il client vero con un finto pagAmico su 127.0.0.1 (sequenze di incasso, comandi
+  semplici, invio, keepalive); 20 in C# e 21 in Kotlin provano il registro su file e il vocabolario
+  degli errori. I due in più di Kotlin (annullo del chiamante, tre processi sullo stesso file)
+  non hanno ancora il gemello in C#.
 - **64 passi di collaudo** contro il simulatore, superati in entrambi i linguaggi. Sono i gruppi
   di default; accendendo anche la sonda del comando non documentato e i riavvii si arriva a 71.
   Dall'11 settembre il passo `[IN]+[CM]` dimostra davvero un commit: prima risultava OK leggendo
@@ -258,9 +259,10 @@ Più circa 1.200 righe di documentazione in Markdown e due manuali PDF generati.
 ### Che cosa è coperto e che cosa no
 
 Il collaudo esercita **tutti** i comandi implementati: restano fuori solo i due deprecati. Ma è
-onesto sapere che i test offline non coprono la parte che riguarda **tempo, rete, stato e file**:
-quella è esercitata solo dal collaudo, cioè solo con un simulatore acceso — e proprio lì stanno i
-difetti dell'attesa d'incasso e del commit che il collaudo non vede.
+onesto sapere che i test offline coprono solo in parte **tempo, rete, stato e file**: dall'11
+settembre le sequenze d'incasso e il registro su file sono provati contro un finto pagAmico, ma
+riconnessione, raffica e comportamento del dispositivo restano al collaudo, cioè a un simulatore
+acceso, e alla macchina vera.
 
 ---
 
@@ -273,8 +275,8 @@ collaudate, sono documentate, e hanno un'infrastruttura di prova che permette di
 discussione in dieci minuti quando serve. Ma la risposta di PayPrint ha fatto emergere tre difetti
 che il collaudo non vedeva. D1 e D3 — il commit letto sul messaggio sbagliato, l'attesa dell'incasso
 chiusa da un testo qualsiasi — sono corretti dall'11 settembre, senza macchina; D2, il timeout che
-abbandona un incasso ancora aperto, va con le prove su una macchina vera, dopo aver regolato il
-keepalive (§3 dell'esito).
+abbandona un incasso ancora aperto, va con le prove su una macchina vera: il keepalive è regolato
+dal 14 settembre, manca la prova del cavo staccato (§3 dell'esito).
 
 **Il piano dell'innesto in Giano è appena cominciato**, ed è fatto finora di sola analisi. La
 buona notizia è che la parte che sembrava più rischiosa — la compatibilità fra una libreria
