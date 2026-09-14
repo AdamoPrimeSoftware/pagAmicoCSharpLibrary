@@ -9,6 +9,13 @@ Libreria client per la cassa rendiresto **PayPrint pagAmico** (protocollo TCP-IP
 
 Le app di prova (WinForms, LiveTest, Tap, Fill, Demo) stanno nel repository **pagAmico_CSharp_Demo**.
 
+Questo repository contiene anche la documentazione di tutto l'SDK (C# e Kotlin):
+
+- [`docs/avvio-progetti.md`](docs/avvio-progetti.md): **come avviare i 4 progetti**
+- `docs/quadro-01..05-*`: documenti di orientamento, da leggere in ordine a partire da `quadro-01-quadro-insieme.pdf`
+- `docs/Integrazione-pagAmico.pdf`, `docs/Guida-prove-pagAmico.pdf`: manuali tecnici (generati dagli script `genera_*.py`, non modificare i PDF a mano)
+- `strumenti/analizza_log.py`: rilegge i log di una sessione di prove
+
 ## Compilare e testare
 
 Aprire `PayPrint.PagAmico.slnx` in Visual Studio, oppure:
