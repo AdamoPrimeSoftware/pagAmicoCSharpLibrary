@@ -62,10 +62,12 @@ public sealed class PagAmicoClient : IDisposable
     public Encoding Encoding { get; set; } = new UTF8Encoding(false);
 
     /// <summary>
-    /// Terminatore accodato ad ogni comando. Il manuale non ne prevede (Hercules invia senza terminatore):
-    /// lasciare vuoto salvo diversa indicazione PayPrint.
+    /// Terminatore accodato ad ogni comando. Il manuale 2.33 non lo documenta, ma PayPrint
+    /// (risposta dell'11 settembre 2026, domande 1.1 e 1.2) indica CR o CR+LF per la macchina.
+    /// Il simulatore del Dev Kit lo accetta: collaudo completo 64/64 con CR (14 settembre 2026).
+    /// Vuoto = nessun terminatore, come Hercules.
     /// </summary>
-    public string CommandTerminator { get; set; } = string.Empty;
+    public string CommandTerminator { get; set; } = "\r";
 
     /// <summary>Timeout di default per i comandi "brevi".</summary>
     public TimeSpan DefaultTimeout { get; set; } = TimeSpan.FromSeconds(15);
@@ -79,10 +81,12 @@ public sealed class PagAmicoClient : IDisposable
     /// <summary>
     /// Distanza minima fra due invii consecutivi.
     /// <para>
-    /// NECESSARIA: il pagAmico legge il buffer del socket e lo interpreta come UN solo comando.
-    /// Due comandi trasmessi a raffica finiscono nello stesso segmento TCP e il secondo viene
-    /// ignorato silenziosamente. Verificato sul simulatore PayPrint: senza pausa il comando si
-    /// perde, con 30 ms passa. Il default tiene un margine.
+    /// Nata perche' una versione precedente del simulatore leggeva il buffer del socket come UN
+    /// solo comando: due comandi senza terminatore nello stesso segmento TCP, il secondo si perdeva.
+    /// Il simulatore attuale regge le raffiche con e senza terminatore (collaudo 64/64 a 0 ms e
+    /// prova con piu' comandi in un segmento, 14 settembre 2026), e PayPrint dice che con CR la
+    /// pausa non serve. Il default resta 80 ms come rete di sicurezza finche' non e' verificato
+    /// sulla macchina reale.
     /// </para>
     /// </summary>
     public TimeSpan MinimumCommandInterval { get; set; } = TimeSpan.FromMilliseconds(80);

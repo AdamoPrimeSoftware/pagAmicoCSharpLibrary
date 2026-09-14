@@ -517,8 +517,8 @@ internal static class SequenceTests
 
         Program.Check(segments.Count == 2 && (segments[1].At - segments[0].At).TotalMilliseconds >= 70,
             "pausa di default: due invii consecutivi arrivano ad almeno 70 ms");
-        Program.Check(segments.Count == 2 && Encoding.UTF8.GetString(segments[1].Data) == "DS",
-            "senza terminatore ogni comando arriva nel suo segmento");
+        Program.Check(segments.Count == 2 && Encoding.UTF8.GetString(segments[1].Data) == "DS\r",
+            "default: ogni comando arriva nel suo segmento, chiuso da CR");
     }
 
     private static async Task TerminatorAppended()
@@ -589,7 +589,7 @@ internal static class SequenceTests
         public PagAmicoClient Client { get; }
         public List<PagAmicoFrame> Orphans { get; } = new();
 
-        /// <param name="defaults">true: configurazione di default della libreria (niente terminatore, pausa di 80 ms).</param>
+        /// <param name="defaults">true: configurazione di default della libreria (terminatore CR, pausa di 80 ms).</param>
         public static async Task<Session> OpenAsync(bool defaults = false)
         {
             var fake = new FakePagAmico();
