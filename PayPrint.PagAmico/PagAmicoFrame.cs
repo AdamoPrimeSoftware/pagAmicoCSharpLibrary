@@ -54,8 +54,9 @@ public sealed class PagAmicoFrame
         Response == "ER" || IsBusy ||
         (IsText && (Raw.StartsWith("ER", StringComparison.OrdinalIgnoreCase) ||
                     Raw.StartsWith("CMD ", StringComparison.OrdinalIgnoreCase) ||
-                    Raw.Contains("CMD ERROR", StringComparison.OrdinalIgnoreCase) ||
-                    Raw.Contains("POS DISABLED", StringComparison.OrdinalIgnoreCase)));
+                    // IndexOf invece di Contains(string, StringComparison): quell'overload manca in .NET Framework
+                    Raw.IndexOf("CMD ERROR", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    Raw.IndexOf("POS DISABLED", StringComparison.OrdinalIgnoreCase) >= 0));
 
     /// <summary>
     /// Macchina impegnata: il testo "BUSY" (anche "ER BUSY"), oppure un ER con E100 ed errorType 99 (manuale p. 61).
