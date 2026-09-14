@@ -34,14 +34,15 @@ Per provare senza la macchina vera: aprire il **pagAmico Dev Kit** → sezione *
 ## 1. pagAmico_CSharp_Lib — libreria C# e test
 
 **Visual Studio:** aprire `PayPrint.PagAmico.slnx`, impostare `PayPrint.PagAmico.Tests` come progetto di avvio, **Ctrl+F5**.
-Risultato atteso: `168 test superati, 0 falliti`.
+Risultato atteso: `169 test superati, 0 falliti`. In alternativa **Test → Esplora test** e *Esegui tutti*.
 
 **Riga di comando:**
 
 ```bash
 cd pagAmico_CSharp_Lib
 dotnet build
-dotnet run --project PayPrint.PagAmico.Tests
+dotnet test                                   # esito sintetico
+dotnet run --project PayPrint.PagAmico.Tests  # elenco completo dei test
 ```
 
 La libreria in sé non si avvia: si usa dalle app del punto 2 o da un altro progetto.
@@ -98,7 +99,8 @@ Se IntelliJ chiede il JDK: *File → Project Structure → SDK* → 17.
 
 ```bash
 cd pagAmico_Kotlin_Lib
-gradlew.bat :pagamico-lib:run
+gradlew.bat test                   # esito sintetico, fallisce se un test non passa
+gradlew.bat :pagamico-lib:run      # elenco completo dei test
 gradlew.bat :pagamico-lib:run "-PmainClass=it.payprint.pagamico.test.LiveTestKt" "--args=127.0.0.1 9100"
 ```
 

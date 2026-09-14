@@ -22,7 +22,8 @@ Aprire `PayPrint.PagAmico.slnx` in Visual Studio, oppure:
 
 ```bash
 dotnet build
-dotnet run --project PayPrint.PagAmico.Tests
+dotnet test                                   # oppure Esplora test di Visual Studio
+dotnet run --project PayPrint.PagAmico.Tests  # stessi test, con l'elenco completo a video
 ```
 
 ## Uso

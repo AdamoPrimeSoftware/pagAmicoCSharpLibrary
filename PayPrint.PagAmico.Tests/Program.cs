@@ -16,9 +16,24 @@ internal static class Program
 {
     private static int _failed;
     private static int _passed;
+    private static readonly List<string> Failures = new();
 
     private static int Main()
     {
+        var (passed, failures) = RunAll();
+
+        Console.WriteLine();
+        Console.WriteLine($"{passed} test superati, {failures.Count} falliti");
+        return failures.Count == 0 ? 0 : 1;
+    }
+
+    /// <summary>Esegue tutti i test offline. Usato da Main (dotnet run) e da SuiteTests (dotnet test).</summary>
+    internal static (int Passed, IReadOnlyList<string> Failures) RunAll()
+    {
+        _passed = 0;
+        _failed = 0;
+        Failures.Clear();
+
         CommandTests();
         ParserTests();
         ResponseTests();
@@ -27,9 +42,7 @@ internal static class Program
         SequenceTests.Run();
         LoggerAndErrorTests.Run();
 
-        Console.WriteLine();
-        Console.WriteLine($"{_passed} test superati, {_failed} falliti");
-        return _failed == 0 ? 0 : 1;
+        return (_passed, Failures.ToArray());
     }
 
     // ---------------------------------------------------------------- comandi (esempi letterali del manuale)
@@ -287,6 +300,7 @@ internal static class Program
     private static void Fail(string what)
     {
         _failed++;
+        Failures.Add(what);
         Console.WriteLine($"  FAIL {what}");
     }
 }
