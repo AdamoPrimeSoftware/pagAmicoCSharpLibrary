@@ -20,15 +20,20 @@ Ogni repository ha due remote, con gli stessi nomi su tutti i PC:
 | `github` | GitHub, la copia di riferimento |
 | `HardDiskEsterno` | il disco esterno, branch `main`. La lettera cambia secondo il PC: **G:** a casa, **E:** in ufficio |
 
-Il branch locale è `main` sul PC di casa e `master` sul PC dell'ufficio; su GitHub e sul disco è
-sempre `main`.
+Il branch è `main` ovunque: sui due PC, su GitHub e sul disco. Il `main` locale segue `github/main`,
+quindi `git pull` e `git push` senza argomenti lavorano con GitHub.
+
+| PC | Cartella dei repository | Disco esterno |
+|---|---|---|
+| casa | `D:\Programmazione\Prime\PerClaude\payPrint` | `G:\git-payprint-repos` |
+| ufficio | `C:\Users\adamo\Desktop\Prime\payPrint` | `E:\git-payprint-repos` |
 
 ```bash
 cd D:\Programmazione\Prime\PerClaude\payPrint      # cartella sul PC di casa
-git clone -o github https://github.com/AdamoPrimeSoftware/pagAmicoCSharpLibrary.git  pagAmico_CSharp_Lib
-git clone -o github https://github.com/AdamoPrimeSoftware/pagAmicoCSharpDemo.git     pagAmico_CSharp_Demo
-git clone -o github https://github.com/AdamoPrimeSoftware/pagAmicoKotlinLibrary.git  pagAmico_Kotlin_Lib
-git clone -o github https://github.com/AdamoPrimeSoftware/pagAmicoKotlinDemo.git     pagAmico_Kotlin_Demo
+git clone -o github https://AdamoPrimeSoftware@github.com/AdamoPrimeSoftware/pagAmicoCSharpLibrary.git  pagAmico_CSharp_Lib
+git clone -o github https://AdamoPrimeSoftware@github.com/AdamoPrimeSoftware/pagAmicoCSharpDemo.git     pagAmico_CSharp_Demo
+git clone -o github https://AdamoPrimeSoftware@github.com/AdamoPrimeSoftware/pagAmicoKotlinLibrary.git  pagAmico_Kotlin_Lib
+git clone -o github https://AdamoPrimeSoftware@github.com/AdamoPrimeSoftware/pagAmicoKotlinDemo.git     pagAmico_Kotlin_Demo
 
 # disco esterno come secondo remote, per ogni repository (G: a casa, E: in ufficio)
 git -C pagAmico_CSharp_Lib remote add HardDiskEsterno G:\git-payprint-repos\pagAmico_CSharp_Lib.git
@@ -37,14 +42,25 @@ git -C pagAmico_CSharp_Lib remote add HardDiskEsterno G:\git-payprint-repos\pagA
 `-o github` dà al remote il nome `github` invece di `origin`. I nomi delle cartelle devono restare
 questi.
 
-Si lavora sugli stessi repository da due PC: **prima di iniziare** `git pull` in tutti e quattro,
-**dopo ogni commit** push su GitHub e sul disco esterno.
+**`AdamoPrimeSoftware@` nell'URL** serve se sul PC Git Credential Manager ha già le credenziali di
+un altro account GitHub: senza, usa quelle e il push fallisce con *Permission denied* (403). Al primo
+accesso si apre il browser: entrare con **AdamoPrimeSoftware**. A un remote già aggiunto senza
+account: `git remote set-url github https://AdamoPrimeSoftware@github.com/AdamoPrimeSoftware/<repository>.git`.
+
+**Disco esterno nuovo o vuoto:** prima di aggiungere il remote si crea il repository sul disco come
+copia bare di GitHub, per ciascuno dei quattro:
 
 ```bash
-git push github main                 # PC di casa
-git push HardDiskEsterno main
-git push github master:main          # PC dell'ufficio, branch locale master
-git push HardDiskEsterno master:main
+git clone --bare https://AdamoPrimeSoftware@github.com/AdamoPrimeSoftware/pagAmicoCSharpLibrary.git G:\git-payprint-repos\pagAmico_CSharp_Lib.git
+```
+
+Si lavora sugli stessi repository da due PC: **prima di iniziare** `git pull` in tutti e quattro,
+**dopo ogni commit** push su GitHub e sul disco esterno. I comandi sono uguali sui due PC:
+
+```bash
+git pull                             # da GitHub
+git push                             # su GitHub
+git push HardDiskEsterno main        # sul disco esterno, se collegato
 ```
 
 Per controllare che un repository sia allineato ai due remote:
@@ -54,6 +70,9 @@ git fetch github
 git status -sb                       # "## main...github/main" senza [ahead]/[behind]
 git ls-remote HardDiskEsterno refs/heads/main
 ```
+
+Se `git branch -vv` non mostra `[github/main]` accanto a `main` (per esempio dopo un clone senza
+`-o github`), si ricollega il branch con `git branch -u github/main main`.
 
 > **Rinominare un remote cambiando solo le maiuscole** (per esempio `gitHub` → `github`) su Windows
 > lascia la configurazione a metà: `git branch -vv` non mostra più `[github/main]`. Si controlla con
