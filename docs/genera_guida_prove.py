@@ -95,15 +95,23 @@ def story():
 
     # ---------------------------------------------------------------- 1
     s.append(P("1. Preparazione", S_H1))
-    s.append(P("Serve una volta sola: due soluzioni da aprire, una per linguaggio."))
+    s.append(P(
+        "Serve una volta sola. Il codice sta in quattro repository, da clonare <b>affiancati</b> nella "
+        "stessa cartella e con questi nomi: le demo trovano la libreria con un percorso relativo. "
+        "Ogni repository ha due remote, <font face='Courier'>github</font> e "
+        "<font face='Courier'>HardDiskEsterno</font> (G: a casa, E: in ufficio); i comandi di clone e "
+        "di push sono in <font face='Courier'>docs/avvio-progetti.md</font>."))
 
     s.append(table([
         ["IDE", "Che cosa si apre", "Al primo avvio"],
-        [VS, "il file <font face='Courier'>csharp\\PayPrint.PagAmico.sln</font>",
+        [VS, "<font face='Courier'>pagAmico_CSharp_Demo\\PayPrint.PagAmico.Demos.slnx</font>: le "
+             "cinque demo piu' la libreria, presa dalla cartella accanto. Per i soli test: "
+             "<font face='Courier'>pagAmico_CSharp_Lib\\PayPrint.PagAmico.slnx</font>",
          "ripristina i pacchetti NuGet da solo. Compilare la soluzione una volta "
-         "(<b>Compila &gt; Compila soluzione</b>) per essere sicuri che i sette progetti stiano in piedi"],
-        [IJ, "la <b>cartella</b> <font face='Courier'>kotlin</font>, non un file: la riconosce come "
-             "progetto Gradle",
+         "(<b>Compila &gt; Compila soluzione</b>). Per i file .slnx serve Visual Studio 2022 17.13 o successivo"],
+        [IJ, "la <b>cartella</b> <font face='Courier'>pagAmico_Kotlin_Demo</font> (banco, con la libreria "
+             "inclusa da <font face='Courier'>includeBuild</font>) oppure "
+             "<font face='Courier'>pagAmico_Kotlin_Lib</font> (test e collaudo)",
          "avvia la sincronizzazione Gradle e scarica le dipendenze. La prima volta ci vuole qualche "
          "minuto, le successive sono immediate"],
     ], [70, 165, CONTENT_W - 235]))
@@ -112,8 +120,9 @@ def story():
         "Servono inoltre il <b>pagAmico Dev Kit</b> di PayPrint (contiene il simulatore, si installa "
         "con <font face='Courier'>pagAmico-DevKit-Setup-1.0.0.exe</font> e finisce in "
         "<font face='Courier'>C:\\Program Files\\pagAmico Dev Kit</font>), il <b>.NET 8 SDK</b> "
-        "(gia' presente se Visual Studio 2022 e' aggiornato) e un <b>JDK 17</b>, che IntelliJ scarica "
-        "da solo se manca."))
+        "(gia' presente se Visual Studio 2022 e' aggiornato) e un <b>JDK 17</b> aggiornato, indicato a "
+        "Gradle in <font face='Courier'>%USERPROFILE%\\.gradle\\gradle.properties</font> "
+        "(<font face='Courier'>docs/avvio-progetti.md</font>)."))
 
     s.append(P("1.1 I sette progetti C#", S_H2))
     s.append(table([
@@ -182,7 +191,9 @@ def story():
 
     s.append(P("2.2 IntelliJ IDEA: le configurazioni di esecuzione", S_H2))
     s.append(P(
-        "Sono nella cartella <font face='Courier'>kotlin\\.run</font> e IntelliJ le carica da solo. "
+        "Sono nelle cartelle <font face='Courier'>.run</font> dei due repository Kotlin (1, 2 e 4 in "
+        "<font face='Courier'>pagAmico_Kotlin_Lib</font>, 3 in <font face='Courier'>pagAmico_Kotlin_Demo</font>) "
+        "e IntelliJ le carica da solo. "
         "Compaiono nel <b>menu a tendina in alto a destra</b>, accanto al tasto verde di avvio."))
 
     s.append(table([
@@ -838,20 +849,21 @@ python strumenti/analizza_log.py --data 2026-09-03  di un giorno preciso
     s.append(P("Appendice. Gli stessi passi da riga di comando", S_H1))
     s.append(P(
         "Servono solo per automatizzare (una catena di build, una prova rapida senza aprire l'IDE). "
-        "Vanno dati dalla cartella <font face='Courier'>pagamico-sdk</font>."))
+        "Vanno dati dalla cartella che contiene i quattro repository."))
     s.append(code("""
-dotnet run --project csharp/PayPrint.PagAmico.Tests
-dotnet run --project csharp/PayPrint.PagAmico.Fill -- 127.0.0.1 9100 `
+dotnet run --project pagAmico_CSharp_Lib/PayPrint.PagAmico.Tests
+dotnet run --project pagAmico_CSharp_Demo/PayPrint.PagAmico.Fill -- 127.0.0.1 9100 `
     --monete 40 --banconote 1200 --aggiorna-fondo
-dotnet run --project csharp/PayPrint.PagAmico.LiveTest -- 127.0.0.1 9100
-dotnet run --project csharp/PayPrint.PagAmico.WinForms
-dotnet run --project csharp/PayPrint.PagAmico.Tap -- --listen 9200 --target 127.0.0.1:9100
+dotnet run --project pagAmico_CSharp_Demo/PayPrint.PagAmico.LiveTest -- 127.0.0.1 9100
+dotnet run --project pagAmico_CSharp_Demo/PayPrint.PagAmico.WinForms
+dotnet run --project pagAmico_CSharp_Demo/PayPrint.PagAmico.Tap -- --listen 9200 --target 127.0.0.1:9100
 """))
     s.append(code("""
-cd kotlin
-gradle :pagamico-lib:run
-gradle :pagamico-lib:run "-PmainClass=it.payprint.pagamico.LiveTestKt" "--args=127.0.0.1 9100"
-gradle :pagamico-desktop:run
+cd pagAmico_Kotlin_Lib
+.\\gradlew.bat :pagamico-lib:run
+.\\gradlew.bat :pagamico-lib:run "-PmainClass=it.payprint.pagamico.test.LiveTestKt" "--args=127.0.0.1 9100"
+cd ..\\pagAmico_Kotlin_Demo
+.\\gradlew.bat :pagamico-desktop:run
 """))
     s.append(P(
         "Le virgolette attorno agli interi argomenti servono: senza, PowerShell spezza "

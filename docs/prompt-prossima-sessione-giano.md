@@ -1,5 +1,14 @@
 ## Dove siamo
 
+> **Aggiornamento del 15 settembre.** L'SDK è diviso in **quattro repository** affiancati in
+> `D:\Programmazione\Prime\PerClaude\payPrint` (a casa), ciascuno con i remote `github` e
+> `HardDiskEsterno` (`docs/avvio-progetti.md`). Fatti dopo l'11 settembre: terminatore CR di default,
+> keepalive TCP regolato (10 s / 2 s / 5 sonde), test offline **170 in C# e 171 in Kotlin**, Tap con
+> comandi dalla console, banco Kotlin impacchettato. Decisioni per Giano: **replicare il VNE** con il
+> log degli importi, Decisione 1 rimandata alle prove 4 e 5 (`docs/decisioni-innesto-giano.md`). Le
+> prove sulla macchina di PayPrint si preparano con `docs/guida-prove-macchina-payprint.pdf`. Il
+> resto di questa sezione è la situazione all'11 settembre.
+
 **PayPrint ha risposto** (11 settembre, `docs/risposta-payprint-2026-09-11.md`), e l'analisi
 verificata della risposta sta in **`docs/esito-risposta-payprint.md`**. Leggerlo è il primo passo di
 qualsiasi sessione.
@@ -50,20 +59,24 @@ fondo e cancellando gli altri due.
 
 ---
 
-Contesto. Due cartelle:
+Contesto. Due posti:
 
-- `C:\Users\adamo\Downloads\pagAmico_2\pagamico-sdk` —
-l'SDK pagAmico: libreria C# multi-target, gemella Kotlin, sei programmi di prova, un
-analizzatore di log, la documentazione.
+- `D:\Programmazione\Prime\PerClaude\payPrint` — l'SDK pagAmico in quattro repository affiancati:
+`pagAmico_CSharp_Lib` (libreria C# multi-target, test, documentazione, analizzatore di log),
+`pagAmico_CSharp_Demo` (banco WinForms, collaudo, Tap, Fill, Demo), `pagAmico_Kotlin_Lib`
+(libreria gemella Kotlin, test, collaudo), `pagAmico_Kotlin_Demo` (banco Compose). Remote `github`
+e `HardDiskEsterno` (G: a casa, E: in ufficio): prima di iniziare `git pull` in tutti e quattro.
 - `D:\Programmazione\Prime\PerClaude\GianoITA` — Giano, il nostro gestionale, che pilota già una
 cassa automatica **VNE** e a cui va aggiunto il pagAmico **accanto**, non al suo posto.
-**Leggi prima questi, in quest'ordine, e non rifare il lavoro che contengono:**
-1. `pagamico-sdk\docs\esito-risposta-payprint.md` — la risposta del fornitore verificata, i tre
-difetti, cosa cambia nelle librerie e in Giano
-2. `pagamico-sdk\docs\quadro-01-quadro-insieme.md` — il quadro generale
-3. `pagamico-sdk\docs\quadro-04-giano-dove-siamo.md` — Giano, il precedente OPOS, la stima
-4. `pagamico-sdk\docs\quadro-05-cosa-non-sappiamo.md` — le decisioni aperte
-5. `pagamico-sdk\docs\analisi-giano-vne-vs-pagamico.md` — il dettaglio riga per riga
+**Leggi prima questi, in quest'ordine, e non rifare il lavoro che contengono** (tutti in
+`pagAmico_CSharp_Lib\docs`):
+1. `esito-risposta-payprint.md` — la risposta del fornitore verificata, i tre difetti, cosa cambia
+nelle librerie e in Giano
+2. `decisioni-innesto-giano.md` — le decisioni prese e quelle rimandate
+3. `quadro-01-quadro-insieme.md` — il quadro generale
+4. `quadro-04-giano-dove-siamo.md` — Giano, il precedente OPOS, la stima
+5. `quadro-05-cosa-non-sappiamo.md` — le decisioni aperte
+6. `analisi-giano-vne-vs-pagamico.md` — il dettaglio riga per riga
 `quadro-02` (le librerie) e `quadro-03` (i programmi di prova) servono se tocchi quelle parti.
 ### I fatti da non rimettere in discussione
 
@@ -100,8 +113,9 @@ attesa riconosce va all'evento dei frame orfani (`OrphanFrame` / `onOrphanFrame`
 se il chiamante dell'incasso viene cancellato, l'esito arriva a `onOrphanFrame`.
 ### Vincoli di lavoro
 
-- **Le due librerie si toccano insieme**, con gli stessi nomi di metodi, asserzioni e passi. Le tre
-divergenze note (annullo, caduta di connessione, mutex del registro) sono in `quadro-02`.
+- **Le due librerie si toccano insieme**, con gli stessi nomi di metodi, asserzioni e passi. Le
+divergenze note (annullo, caduta di connessione, registro fra processi) sono in `quadro-02`.
+- **Dopo ogni commit, push su `github` e su `HardDiskEsterno`.**
 - **Giano/Neo è C# 7.3**, csproj non-SDK: ogni file nuovo va elencato a mano in
 `<Compile Include>`. Niente record, niente switch expression, niente DI. Il vincolo vale per il
 codice **di Neo**: la libreria referenziata resta com'è.
@@ -148,6 +162,8 @@ su quelli con password in coda; la prova «raffica» (due comandi in una sola sc
 2. **Macchina vera**: `CM` durante `IN` (quanti frame, quale campo); `AN` con denaro dentro; un
 comando mandato durante `IN` per vedere la forma di `BUSY`; riconnessione a incasso aperto; la
 raffica con CR.
+La fase 1 è fatta (14 settembre, `prova-terminatore-cr-2026-09-14.md`). Per la fase 2 segui
+`guida-prove-macchina-payprint.md` e `checklist-macchina-reale.md`.
 Col proxy acceso, sempre. Dopo ogni prova aggiorna l'esito e i documenti che la riguardano.
 **La macchina di PayPrint è di terzi.** Niente che svuoti le giacenze, azzeri le banconote o
 lasci un incasso aperto senza un accordo esplicito con Viglione, e senza il mio via libera.

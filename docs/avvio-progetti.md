@@ -13,21 +13,52 @@ I 4 repository vanno clonati **affiancati nella stessa cartella**: le demo trova
 | `pagAmico_Kotlin_Lib` | `github.com/AdamoPrimeSoftware/pagAmicoKotlinLibrary` | `git-payprint-repos\pagAmico_Kotlin_Lib.git` |
 | `pagAmico_Kotlin_Demo` | `github.com/AdamoPrimeSoftware/pagAmicoKotlinDemo` | `git-payprint-repos\pagAmico_Kotlin_Demo.git` |
 
-Il disco esterno ha una lettera diversa secondo il PC: **G:** sul PC di casa, **E:** sul PC dell'ufficio.
+Ogni repository ha due remote, con gli stessi nomi su tutti i PC:
+
+| Remote | Dove punta |
+|---|---|
+| `github` | GitHub, la copia di riferimento |
+| `HardDiskEsterno` | il disco esterno, branch `main`. La lettera cambia secondo il PC: **G:** a casa, **E:** in ufficio |
+
+Il branch locale è `main` sul PC di casa e `master` sul PC dell'ufficio; su GitHub e sul disco è
+sempre `main`.
 
 ```bash
 cd D:\Programmazione\Prime\PerClaude\payPrint      # cartella sul PC di casa
-git clone https://github.com/AdamoPrimeSoftware/pagAmicoCSharpLibrary.git  pagAmico_CSharp_Lib
-git clone https://github.com/AdamoPrimeSoftware/pagAmicoCSharpDemo.git     pagAmico_CSharp_Demo
-git clone https://github.com/AdamoPrimeSoftware/pagAmicoKotlinLibrary.git  pagAmico_Kotlin_Lib
-git clone https://github.com/AdamoPrimeSoftware/pagAmicoKotlinDemo.git     pagAmico_Kotlin_Demo
+git clone -o github https://github.com/AdamoPrimeSoftware/pagAmicoCSharpLibrary.git  pagAmico_CSharp_Lib
+git clone -o github https://github.com/AdamoPrimeSoftware/pagAmicoCSharpDemo.git     pagAmico_CSharp_Demo
+git clone -o github https://github.com/AdamoPrimeSoftware/pagAmicoKotlinLibrary.git  pagAmico_Kotlin_Lib
+git clone -o github https://github.com/AdamoPrimeSoftware/pagAmicoKotlinDemo.git     pagAmico_Kotlin_Demo
 
 # disco esterno come secondo remote, per ogni repository (G: a casa, E: in ufficio)
 git -C pagAmico_CSharp_Lib remote add HardDiskEsterno G:\git-payprint-repos\pagAmico_CSharp_Lib.git
 ```
 
-I nomi delle cartelle devono restare questi. Prima di iniziare a lavorare: `git pull`, perché si lavora
-sugli stessi repository da due PC. Dopo ogni commit: push su GitHub e sul disco esterno.
+`-o github` dà al remote il nome `github` invece di `origin`. I nomi delle cartelle devono restare
+questi.
+
+Si lavora sugli stessi repository da due PC: **prima di iniziare** `git pull` in tutti e quattro,
+**dopo ogni commit** push su GitHub e sul disco esterno.
+
+```bash
+git push github main                 # PC di casa
+git push HardDiskEsterno main
+git push github master:main          # PC dell'ufficio, branch locale master
+git push HardDiskEsterno master:main
+```
+
+Per controllare che un repository sia allineato ai due remote:
+
+```bash
+git fetch github
+git status -sb                       # "## main...github/main" senza [ahead]/[behind]
+git ls-remote HardDiskEsterno refs/heads/main
+```
+
+> **Rinominare un remote cambiando solo le maiuscole** (per esempio `gitHub` → `github`) su Windows
+> lascia la configurazione a metà: `git branch -vv` non mostra più `[github/main]`. Si controlla con
+> `git config --get-regexp "^branch\.main|^remote\."` e si correggono `remote.github.fetch` e
+> `branch.main.remote`.
 
 ### Strumenti
 
