@@ -5,7 +5,7 @@ Libreria client per la cassa rendiresto **PayPrint pagAmico** (protocollo TCP-IP
 | Progetto | Contenuto |
 |---|---|
 | `PayPrint.PagAmico` | libreria (`net8.0`, `netstandard2.0`, `net47`; sui target legacy la sola dipendenza `System.Text.Json`) |
-| `PayPrint.PagAmico.Tests` | 169 test offline: stringhe dei manuali, sequenze di incasso contro un finto pagAmico, registro su file |
+| `PayPrint.PagAmico.Tests` | 170 test offline: stringhe dei manuali, sequenze di incasso contro un finto pagAmico, registro su file |
 
 Le app di prova (WinForms, LiveTest, Tap, Fill, Demo) stanno nel repository **pagAmico_CSharp_Demo**.
 

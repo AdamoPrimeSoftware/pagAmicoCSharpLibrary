@@ -329,7 +329,7 @@ def story():
         ["Protocollo", "PayPrint pagAmico, TCP-IP rev. 2.33 - firmware 8.72"],
         ["Documenti di base", "Manuale Lista comandi TCP-IP 2.33; Integrazione display 1.2; "
                               "Protocollo di stampa 2.00; Note di rilascio FW 8.72; Guida pagAmico Dev Kit 1.0"],
-        ["Stato della verifica", "test offline superati: 169 in C#, 171 in Kotlin; 64 passi di collaudo "
+        ["Stato della verifica", "test offline superati: 170 in C#, 171 in Kotlin; 64 passi di collaudo "
                                  "sul simulatore in entrambi i linguaggi (14 settembre 2026)"],
     ], [95, CONTENT_W - 95], header=False))
 
@@ -358,8 +358,8 @@ def story():
         ["PayPrint.PagAmico", "la libreria: nessuna dipendenza esterna, solo <font face='Courier'>System.Text.Json</font>. "
                               "Compila per net8.0, netstandard2.0 e net47"],
         ["PayPrint.PagAmico.WinForms", "banco di prova con tutti i comandi, pannello del traffico e finestra di log"],
-        ["PayPrint.PagAmico.Tests", "169 test offline: 86 confrontano le stringhe generate con gli esempi dei "
-                                    "manuali, 63 fanno parlare il client con un finto pagAmico locale, 20 provano "
+        ["PayPrint.PagAmico.Tests", "170 test offline: 86 confrontano le stringhe generate con gli esempi dei "
+                                    "manuali, 63 fanno parlare il client con un finto pagAmico locale, 21 provano "
                                     "il registro su file e gli errori"],
         ["PayPrint.PagAmico.LiveTest", "collaudo end-to-end: 64 passi in 13 gruppi di default (71 in 15, accendendo la sonda DI e i riavvii), contro simulatore o macchina reale"],
         ["PayPrint.PagAmico.Tap", "proxy TCP che registra il traffico fra un client qualsiasi e la macchina"],
@@ -372,7 +372,7 @@ def story():
     s.append(table([
         ["Modulo", "Ruolo"],
         ["pagamico-lib", "la libreria (coroutine + kotlinx-serialization), gli stessi test offline (171: "
-                         "due in piu', annullo del chiamante e tre processi sullo stesso file) e "
+                         "uno in piu': l'esito di un annullo del chiamante dentro l'eccezione di cancellazione) e "
                          "lo stesso collaudo a 64 passi"],
         ["pagamico-desktop", "banco di prova Compose for Desktop, gemello di quello WinForms"],
     ], [150, CONTENT_W - 150]))

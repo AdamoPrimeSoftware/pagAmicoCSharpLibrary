@@ -18,8 +18,10 @@ internal static class Program
     private static int _passed;
     private static readonly List<string> Failures = new();
 
-    private static int Main()
+    private static int Main(string[] args)
     {
+        if (args.Length == 5 && args[0] == LoggerWriterProcess.Argument) return LoggerWriterProcess.Run(args);
+
         var (passed, failures) = RunAll();
 
         Console.WriteLine();

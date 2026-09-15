@@ -225,10 +225,11 @@ il primo controllo della giornata: se fallisce qui, non ha senso collegarsi.
 Non usano nessun framework di test: sono un normale programma con tre primitive scritte a mano.
 Scelta coerente col resto — zero dipendenze, si lancia e basta.
 
-### Che cosa verificano i test (169 in C#, 171 in Kotlin)
+### Che cosa verificano i test (170 in C#, 171 in Kotlin)
 
-Dove i numeri differiscono, il primo è C# e il secondo Kotlin: i due test in più di Kotlin non
-hanno ancora il gemello in C#.
+Dove i numeri differiscono, il primo è C# e il secondo Kotlin. L'unico test in più di Kotlin
+riguarda la cancellazione delle coroutine: in C# l'annullo col token restituisce l'esito, in Kotlin
+la cancellazione deve propagarsi subito e l'esito viaggia con l'eccezione.
 
 | Sezione | Asserzioni | Che cosa verifica |
 |---|---:|---|
@@ -239,7 +240,7 @@ hanno ancora il gemello in C#.
 | **Display** | 9 | i comandi contro gli esempi del manuale, il JSON compatto delle liste e il limite di caratteri |
 | **Sequenze di incasso** | 52 / 53 | dall'11 settembre: il client vero contro un finto pagAmico su 127.0.0.1. `OK p BUSY p IN`, `OK CMD ERROR IN`, `BUSY` e `ER E100/99` prima dell'`OK`, `CM/OK` seguito dal `CM` finale, `CM/NO`, `CM` prima dell'`OK`, una sola chiusura per incasso, annullo del chiamante prima e dopo l'`OK`, invii bloccati a incasso aperto, frame orfani, `PO`/`IM`/`I2`, chiusura forzata dal pannello, timeout, caduta e `Disconnect()` a incasso aperto, caduta mentre il `CM` aspetta l'`OK`; solo Kotlin: l'esito `AN` arriva anche con l'eccezione di cancellazione del chiamante |
 | **Comandi semplici e invio** | 11 | un `CM` in ritardo non fa da risposta a `ST`; `OK`, testo di errore e `LO`; la pausa di 80 ms e il CR con la configurazione di default; il terminatore CR+LF; i due incapsulamenti delle immagini, byte per byte; il keepalive TCP regolato alla connessione |
-| **Registro su file** | 7 / 8 | due scrittori sullo stesso file, cambio di giorno, due logger avviati in giorni diversi, ripulitura dei caratteri di controllo, troncamento, logger spento; solo Kotlin: tre processi veri sullo stesso file |
+| **Registro su file** | 8 | due scrittori sullo stesso file, tre processi veri sullo stesso file, cambio di giorno, due logger avviati in giorni diversi, ripulitura dei caratteri di controllo, troncamento, logger spento |
 | **Errori e display** | 13 | il comando `DI`, le descrizioni dei codici, la stringa di stato, il riconoscimento di `BUSY` |
 
 ### Che cosa NON coprono
@@ -252,9 +253,6 @@ hanno ancora il gemello in C#.
   due comandi chiusi da CR senza pausa si vede solo su una macchina vera. E il finto pagAmico
   risponde con le sequenze che conosciamo dal simulatore e dal manuale: quelle della macchina vera
   restano da vedere.
-- **Il registro su file fra processi veri, in C#.** Kotlin dal 14 settembre ha un lock fra processi
-  e un test con tre processi separati sullo stesso file. In C# i test usano due logger nello stesso
-  processo: per il mutex con nome è lo stesso meccanismo, ma due processi separati non sono provati.
 - **Il keepalive con un cavo staccato.** I test verificano i valori applicati al socket, non dopo
   quanto una caduta vera viene vista: è la prova 10 di `checklist-macchina-reale.md`.
 - **Quali incapsulamenti delle immagini accetta la macchina**: i test verificano i byte che
@@ -264,7 +262,7 @@ hanno ancora il gemello in C#.
 > **In sintesi.** Gli 86 test sui manuali coprono bene **la traduzione fra i manuali e le
 > stringhe** — comandi in uscita, JSON in entrata — e il framing, che sono le due cose in cui è
 > facile sbagliare in silenzio. I 63 (64 in Kotlin) contro il finto pagAmico coprono lo **stato
-> dell'incasso**, dove stavano D1 e D3, e i comandi semplici; i 20 (21) sul registro e sugli
+> dell'incasso**, dove stavano D1 e D3, e i comandi semplici; i 21 sul registro e sugli
 > errori il resto della libreria. Quello che resta al collaudo, e alla macchina vera, è il comportamento del dispositivo.
 
 ---

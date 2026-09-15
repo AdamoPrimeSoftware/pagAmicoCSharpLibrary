@@ -119,7 +119,7 @@ def story():
     s.append(table([
         ["Progetto", "A che serve", "Si avvia?"],
         ["PayPrint.PagAmico", "la libreria", "no, e' una libreria"],
-        ["PayPrint.PagAmico.Tests", "169 test offline, solo 127.0.0.1", "si, nessun argomento"],
+        ["PayPrint.PagAmico.Tests", "170 test offline, solo 127.0.0.1", "si, nessun argomento"],
         ["PayPrint.PagAmico.WinForms", "il banco di prova", "si, nessun argomento"],
         ["PayPrint.PagAmico.LiveTest", "collaudo automatico, 64 passi", "si, 7 profili"],
         ["PayPrint.PagAmico.Fill", "riempie le giacenze del simulatore", "si, 4 profili"],
@@ -223,7 +223,7 @@ def story():
         ["", "Che cosa fare", "Atteso"],
         [VS, "tasto destro su <b>PayPrint.PagAmico.Tests</b>, <b>Imposta come progetto di avvio</b>, "
              "poi <b>Ctrl+F5</b> (senza debug, cosi' la finestra resta aperta)",
-         "<font face='Courier'>169 test superati, 0 falliti</font>"],
+         "<font face='Courier'>170 test superati, 0 falliti</font>"],
         [IJ, "configurazione <b>1 - Test offline</b>, tasto verde",
          "<font face='Courier'>171 test superati, 0 falliti</font> nella finestra <i>Run</i>"],
     ], [70, 210, CONTENT_W - 280]))
@@ -700,7 +700,7 @@ python strumenti/analizza_log.py --data 2026-09-03  di un giorno preciso
     ], [18, 100, 190, CONTENT_W - 308]))
 
     s.append(P(
-        "Atteso al termine: <b>169 su 169</b> offline in C# e <b>171 su 171</b> in Kotlin, "
+        "Atteso al termine: <b>170 su 170</b> offline in C# e <b>171 su 171</b> in Kotlin, "
         "<b>64 su 64</b> di collaudo in entrambi i linguaggi.", S_SMALL))
 
     # ---------------------------------------------------------------- 12

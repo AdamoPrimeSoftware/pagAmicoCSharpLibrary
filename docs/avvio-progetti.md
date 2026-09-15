@@ -35,6 +35,8 @@ sugli stessi repository da due PC. Dopo ogni commit: push su GitHub e sul disco 
 |---|---|
 | C# | .NET SDK 8 (o successivo) + Visual Studio 2022 17.13 o successivo (per aprire i file `.slnx`) |
 | Kotlin | JDK 17 (verificato con 17.0.14 e 17.0.20; il 17.0.8 non regola il keepalive TCP) + IntelliJ IDEA. Gradle non va installato: si usa `gradlew` incluso |
+| Prove senza macchina | **pagAmico Dev Kit** di PayPrint (`pagAmico-DevKit-Setup-1.0.0.exe`) |
+| Script in `docs/` e `strumenti/` | Python 3 |
 
 Il JDK di Gradle si fissa una volta per PC in `%USERPROFILE%\.gradle\gradle.properties`, non nei
 repository (il percorso cambia da un PC all'altro):
@@ -44,8 +46,6 @@ org.gradle.java.home=C:\\Users\\adamo\\.jdks\\ms-17.0.20.1
 ```
 
 In IntelliJ, *Settings → Build Tools → Gradle → Gradle JVM* sullo stesso JDK.
-| Prove senza macchina | **pagAmico Dev Kit** di PayPrint (`pagAmico-DevKit-Setup-1.0.0.exe`) |
-| Script in `docs/` e `strumenti/` | Python 3 |
 
 ### Simulatore
 
@@ -56,7 +56,7 @@ Per provare senza la macchina vera: aprire il **pagAmico Dev Kit** → sezione *
 ## 1. pagAmico_CSharp_Lib — libreria C# e test
 
 **Visual Studio:** aprire `PayPrint.PagAmico.slnx`, impostare `PayPrint.PagAmico.Tests` come progetto di avvio, **Ctrl+F5**.
-Risultato atteso: `169 test superati, 0 falliti`. In alternativa **Test → Esplora test** e *Esegui tutti*.
+Risultato atteso: `170 test superati, 0 falliti`. In alternativa **Test → Esplora test** e *Esegui tutti*.
 
 **Riga di comando:**
 

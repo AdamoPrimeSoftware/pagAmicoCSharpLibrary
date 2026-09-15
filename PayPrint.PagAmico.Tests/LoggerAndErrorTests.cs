@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -30,6 +31,7 @@ internal static class LoggerAndErrorTests
         try
         {
             ConcurrentWriters(dir);
+            CrossProcessWriters(dir);
             DayChange(dir);
             WritersStartedOnDifferentDays(dir);
             Sanitize(dir);
@@ -59,6 +61,44 @@ internal static class LoggerAndErrorTests
         var wellFormed = new Regex(@"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}  TX  [AB]-\d+$");
         Program.Check(lines.Length == 2 * perWriter && lines.All(l => wellFormed.IsMatch(l)),
             "due logger sullo stesso file da due thread: 1000 righe intatte");
+    }
+
+    /// <summary>
+    /// Tre processi veri sullo stesso file: questo e due figli, lanciati con lo stesso assembly di test. Il mutex
+    /// con nome deve tenere intere tutte le righe, come il lock sul file in Kotlin.
+    /// </summary>
+    private static void CrossProcessWriters(string dir)
+    {
+        const int perWriter = 500;
+        // sotto "dotnet test" il processo corrente e' testhost: il figlio si avvia sempre con l'host dotnet
+        var dotnet = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH") is { Length: > 0 } host ? host : "dotnet";
+        var assembly = typeof(LoggerWriterProcess).Assembly.Location;
+
+        var children = new[] { "C", "D" }.Select(label =>
+        {
+            var start = new ProcessStartInfo(dotnet) { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
+            foreach (var arg in new[] { assembly, LoggerWriterProcess.Argument, dir, "processi", label, perWriter.ToString() })
+                start.ArgumentList.Add(arg);
+            return Process.Start(start)!;
+        }).ToArray();
+
+        using (var log = new PagAmicoFileLogger(dir, "processi"))
+            for (var i = 0; i < perWriter; i++) log.Write("TX", $"A-{i}");
+
+        var exited = children.All(p =>
+        {
+            // letti fino in fondo, cosi' un figlio che scrive molto non si blocca sul buffer pieno
+            p.StandardOutput.ReadToEnd();
+            p.StandardError.ReadToEnd();
+            var done = p.WaitForExit(60_000) && p.ExitCode == 0;
+            p.Dispose();
+            return done;
+        });
+
+        var lines = ReadShared(Path.Combine(dir, $"processi-{DateTime.Now:yyyy-MM-dd}.log"));
+        var wellFormed = new Regex(@"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}  TX  [ACD]-\d+$");
+        Program.Check(exited && lines.Length == 3 * perWriter && lines.All(l => wellFormed.IsMatch(l)),
+            "tre processi sullo stesso file: 1500 righe intatte");
     }
 
     private static void DayChange(string dir)

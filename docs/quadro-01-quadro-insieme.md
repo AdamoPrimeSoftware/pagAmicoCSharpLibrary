@@ -240,12 +240,12 @@ Più circa 1.200 righe di documentazione in Markdown e due manuali PDF generati.
 
 ### Lo stato della verifica
 
-- **Test offline** tutti superati: **169 in C#, 171 in Kotlin**. 86 confrontano le stringhe
+- **Test offline** tutti superati: **170 in C#, 171 in Kotlin**. 86 confrontano le stringhe
   generate con gli esempi letterali dei manuali, carattere per carattere; 63 in C# e 64 in Kotlin
   fanno parlare il client vero con un finto pagAmico su 127.0.0.1 (sequenze di incasso, comandi
-  semplici, invio, keepalive); 20 in C# e 21 in Kotlin provano il registro su file e il vocabolario
-  degli errori. I due in più di Kotlin (annullo del chiamante, tre processi sullo stesso file)
-  non hanno ancora il gemello in C#.
+  semplici, invio, keepalive); 21 provano il registro su file, anche con tre processi veri, e il
+  vocabolario degli errori. Il test in più di Kotlin è proprio del linguaggio: l'esito di un
+  annullo del chiamante viaggia con l'eccezione di cancellazione, mentre in C# viene restituito.
 - **64 passi di collaudo** contro il simulatore, superati in entrambi i linguaggi. Sono i gruppi
   di default; accendendo anche la sonda del comando non documentato e i riavvii si arriva a 71.
   Dall'11 settembre il passo `[IN]+[CM]` dimostra davvero un commit: prima risultava OK leggendo
