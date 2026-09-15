@@ -19,6 +19,7 @@ Scopo: chiudere in una sola sessione i punti che il simulatore non permette di v
       `python strumenti\analizza_log.py`
 
 > **Mai** su questa macchina: `Fill` (esegue incassi veri) e il gruppo `riavvii` del collaudo, salvo accordo.
+> Su una macchina **non nostra** (quella di PayPrint) valgono regole più strette, gruppo per gruppo: `guida-prove-macchina-payprint.md`, capitolo 3.
 
 Per ogni prova annotare: ora, comandi inviati, frame ricevuti (dal log), comportamento fisico della macchina.
 
@@ -106,6 +107,8 @@ Incasso aperto, staccare il cavo di rete **dal lato della macchina** (o fra swit
 ```bash
 dotnet run --project PayPrint.PagAmico.LiveTest -- 127.0.0.1 9200 immagini,print2 --terminatore cr
 ```
+
+> **Solo sulla nostra macchina.** Il gruppo `immagini` contiene `SF`, che **sostituisce il logo permanente**. Su una macchina altrui (PayPrint) fare la prova dal banco con `[SI]`/`[SR]` e la stampa, con il consenso: vedi `guida-prove-macchina-payprint.md`.
 
 - **Guardare:** `SF`/`SI` accettati con il CR dopo il pacchetto; `PTPRDT` con CR/LF nel contenuto stampa correttamente.
 - **Decide:** se il terminatore va escluso dopo i pacchetti binari.

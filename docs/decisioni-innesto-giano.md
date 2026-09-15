@@ -1,8 +1,45 @@
 # Decisioni da prendere prima dell'adattatore Giano
 
 *14 settembre 2026. Due decisioni che bloccano il disegno dell'adattatore pagAmico in Giano. Qui ci
-sono le opzioni e le loro conseguenze, non la scelta. Fonti: `analisi-giano-vne-vs-pagamico.md`,
+sono le opzioni e le loro conseguenze. Fonti: `analisi-giano-vne-vs-pagamico.md`,
 `esito-risposta-payprint.md` (capitolo 4).*
+
+> **Stato al 15 settembre.** Linea scelta: **l'adattatore replica il comportamento del VNE**, con
+> in più il log degli importi che oggi si perdono.
+> - **Decisione 1 rimandata** a dopo le prove 4 e 5 di `checklist-macchina-reale.md`. Fino ad
+>   allora, per replicare il VNE, "annulla senza restituire" = `CM`, vendita annullata in Giano come
+>   oggi, e l'importo trattenuto scritto nel log.
+> - **Decisione 2: replicare il VNE.** Gli orfani vanno solo nel file di log (lo fa già
+>   `PagAmicoFileLogger`), con l'importo in evidenza; niente tabella e niente avvisi per ora. La
+>   pulizia dei pendenti diventa: `IN` rifiutato con `BUSY` → `CM` → nuovo `IN`, se le prove 6 e 9
+>   confermano che la macchina accetta `CM` sulla nuova connessione.
+
+## Quando servono queste decisioni
+
+**"Annulla senza restituire"** (`CancelPayment(returnPartialPayment: false)`) in Giano capita in tre casi:
+
+| Caso | Dove | Oggi con il VNE |
+|---|---|---|
+| tasto Annulla nella finestra di pagamento, con denaro già inserito | `AutomatedPaymentWindowVM.cs:582` (poi vendita annullata a `:625`; da confermare sul codice) | la macchina trattiene, la vendita non c'è |
+| bonifica dei pagamenti rimasti pendenti, prima di ogni nuovo pagamento | `AutomatedPaymentWindowVM.cs:517` | chiusi trattenendo, senza vendita e senza log |
+| pulsante *Clear* della pagina Hardware | `VneAutomaticCashDevicesPageVM.cs:188` | come sopra, a mano |
+
+La restituzione (`true`) c'è in un solo punto, la restituzione parziale (`:833`). Sul VNE il comando
+si chiama `AcceptPartialPayment`: anche lì la macchina registra un pagamento parziale accettato,
+quindi `CM` è l'equivalente fedele.
+
+**I frame orfani** sono messaggi della macchina che arrivano quando la libreria non sta aspettando
+nulla. Nel funzionamento normale non ce ne sono. Arrivano quando:
+
+1. Giano si blocca o il PC si riavvia a incasso aperto: la macchina resta in `IN`, il cliente può
+   continuare a inserire, e parziali ed esito arrivano senza nessuno che li attenda;
+2. la rete cade a incasso aperto: stessa cosa, dopo la riconnessione;
+3. qualcuno chiude l'incasso dal pannello (RESTO + password): arriva un `AN` non chiesto;
+4. scade il timeout di 5 minuti della libreria (D2, da togliere);
+5. arriva un messaggio in ritardo (il `CM` in più visto sul simulatore), di solito senza importi.
+
+Il VNE non aveva questo problema: il pagamento restava registrato sulla macchina con un id e Giano
+lo interrogava. Il pagAmico manda ogni messaggio una volta sola: se nessuno lo raccoglie, si perde.
 
 ---
 

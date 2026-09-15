@@ -12,6 +12,7 @@ Le app di prova (WinForms, LiveTest, Tap, Fill, Demo) stanno nel repository **pa
 Questo repository contiene anche la documentazione di tutto l'SDK (C# e Kotlin):
 
 - [`docs/avvio-progetti.md`](docs/avvio-progetti.md): **come avviare i 4 progetti**
+- [`docs/guida-prove-macchina-payprint.pdf`](docs/guida-prove-macchina-payprint.pdf): come condurre le prove sulla macchina di PayPrint (dal `.md` con `genera_pdf_da_md.py`)
 - `docs/quadro-01..05-*`: documenti di orientamento, da leggere in ordine a partire da `quadro-01-quadro-insieme.pdf`
 - `docs/Integrazione-pagAmico.pdf`, `docs/Guida-prove-pagAmico.pdf`: manuali tecnici (generati dagli script `genera_*.py`, non modificare i PDF a mano)
 - `strumenti/analizza_log.py`: rilegge i log di una sessione di prove
