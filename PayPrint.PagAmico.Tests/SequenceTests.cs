@@ -52,6 +52,7 @@ internal static class SequenceTests
         await TerminatorAppended();
         await KeepAliveConfigured();
         await ImagePackets();
+        await CommandNotifiedBeforeResponse();
     }
 
     private static async Task RunAsync()
@@ -542,6 +543,29 @@ internal static class SequenceTests
         s.Client.CommandTerminator = "\r\n";
         await s.Client.ClearDisplayAsync();
         Program.Check(Encoding.ASCII.GetString(s.Fake.TakeBytes(4)) == "CL\r\n", "terminatore CR+LF accodato al comando");
+    }
+
+    /// <summary>
+    /// La notifica del comando esce prima dei byte: nel log la riga del comando precede sempre quella
+    /// della risposta. Prima della correzione del 16/09 l'evento era sollevato dopo la scrittura, e su
+    /// 127.0.0.1 la risposta veniva registrata per prima.
+    /// </summary>
+    private static async Task CommandNotifiedBeforeResponse()
+    {
+        using var s = await Session.OpenAsync();
+        var order = new List<string>();
+        s.Client.CommandSent += (_, c) => { lock (order) order.Add("TX " + c); };
+        s.Client.FrameReceived += (_, f) => { lock (order) order.Add("RX " + f.Raw); };
+
+        var status = s.Client.GetStatusAsync();
+        s.Fake.Expect("ST");
+        s.Fake.Json(StFinal);
+        await Within(status);
+
+        List<string> seen;
+        lock (order) seen = new List<string>(order);
+        Program.Check(seen.Count >= 2 && seen[0] == "TX ST" && seen[1].StartsWith("RX "),
+            "il comando e' notificato prima della risposta: nel log la riga TX precede la RX");
     }
 
     private static async Task ImagePackets()

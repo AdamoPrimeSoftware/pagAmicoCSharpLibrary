@@ -255,15 +255,15 @@ public sealed class PagAmicoClient : IDisposable
     public Task SendRawAsync(byte[] payload, CancellationToken ct = default) =>
         WriteAsync(payload, "(invio binario)", duringCollection: false, ct);
 
-    private async Task SendCommandAsync(string command, bool duringCollection, CancellationToken ct)
+    private Task SendCommandAsync(string command, bool duringCollection, CancellationToken ct)
     {
         var payload = Encoding.GetBytes(command + CommandTerminator);
-        await WriteAsync(payload, command, duringCollection, ct).ConfigureAwait(false);
-        CommandSent?.Invoke(this, command);
+        return WriteAsync(payload, command, duringCollection, ct, () => CommandSent?.Invoke(this, command));
     }
 
     // duringCollection: vero solo per l'[IN] stesso e per l'[AN] / [CM] che lo chiudono
-    private async Task WriteAsync(byte[] payload, string what, bool duringCollection, CancellationToken ct)
+    // onSending: notifica del traffico in uscita, chiamata sotto il lock appena prima dei byte
+    private async Task WriteAsync(byte[] payload, string what, bool duringCollection, CancellationToken ct, Action? onSending = null)
     {
         var stream = _stream ?? throw new PagAmicoException("Client non connesso: chiamare ConnectAsync()");
         if (!duringCollection) ThrowIfCollecting(what);
@@ -282,6 +282,9 @@ public sealed class PagAmicoClient : IDisposable
                 await Task.Delay(wait, ct).ConfigureAwait(false);
             }
 
+            // la notifica esce prima dei byte: altrimenti su una rete veloce la risposta puo' essere
+            // registrata prima del comando che l'ha provocata, e il log diventa illeggibile
+            onSending?.Invoke();
             await stream.WriteAsync(payload, 0, payload.Length, ct).ConfigureAwait(false);
             await stream.FlushAsync(ct).ConfigureAwait(false);
             _lastSendUtc = DateTime.UtcNow;
@@ -1170,26 +1173,21 @@ public sealed class PagAmicoClient : IDisposable
     // ------------------------------------------------------------------ immagini
 
     /// <summary>[SF] Invia il logo permanente (PNG, area 571x520 dip).</summary>
-    public async Task SendLogoAsync(byte[] pngBytes, CancellationToken ct = default)
-    {
-        await SendRawAsync(BuildImagePacket("SF", pngBytes), ct).ConfigureAwait(false);
-        NotifyBinarySent("SF", pngBytes.Length);
-    }
+    public Task SendLogoAsync(byte[] pngBytes, CancellationToken ct = default) =>
+        SendImagePacketAsync("SF", pngBytes, ct);
 
     /// <summary>[SI] Invia un'immagine temporanea (PNG/JPG/BMP) che sostituisce il logo fino alla rimozione.</summary>
-    public async Task SendTemporaryImageAsync(byte[] imageBytes, CancellationToken ct = default)
-    {
-        await SendRawAsync(BuildImagePacket("SI", imageBytes), ct).ConfigureAwait(false);
-        NotifyBinarySent("SI", imageBytes.Length);
-    }
+    public Task SendTemporaryImageAsync(byte[] imageBytes, CancellationToken ct = default) =>
+        SendImagePacketAsync("SI", imageBytes, ct);
 
     /// <summary>[SR] Rimuove l'immagine temporanea e ripristina il logo.</summary>
     public Task RemoveTemporaryImageAsync(CancellationToken ct = default) =>
         SendRawAsync(PagAmicoCommands.RemoveTempImage(), ct);
 
-    /// <summary>Notifica manualmente il traffico in uscita per gli invii binari (immagini).</summary>
-    private void NotifyBinarySent(string prefix, int length) =>
-        CommandSent?.Invoke(this, $"[{prefix}] payload binario di {length} byte");
+    /// <summary>Invia un pacchetto immagine, notificando il traffico in uscita prima dei byte.</summary>
+    private Task SendImagePacketAsync(string prefix, byte[] imageBytes, CancellationToken ct) =>
+        WriteAsync(BuildImagePacket(prefix, imageBytes), "(invio binario)", duringCollection: false, ct,
+            () => CommandSent?.Invoke(this, $"[{prefix}] payload binario di {imageBytes.Length} byte"));
 
     private byte[] BuildImagePacket(string prefix, byte[] image)
     {
