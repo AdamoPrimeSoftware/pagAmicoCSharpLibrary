@@ -112,7 +112,7 @@ Per provare senza la macchina vera: aprire il **pagAmico Dev Kit** → sezione *
 ## 1. pagAmico_CSharp_Lib — libreria C# e test
 
 **Visual Studio:** aprire `PayPrint.PagAmico.slnx`, impostare `PayPrint.PagAmico.Tests` come progetto di avvio, **Ctrl+F5**.
-Risultato atteso: `170 test superati, 0 falliti`. In alternativa **Test → Esplora test** e *Esegui tutti*.
+Risultato atteso: `171 test superati, 0 falliti`. In alternativa **Test → Esplora test** e *Esegui tutti*.
 
 **Riga di comando:**
 
@@ -167,7 +167,7 @@ Per la macchina reale sostituire `127.0.0.1` con il suo indirizzo (es. `192.168.
 
 | Configurazione | Cosa fa |
 |---|---|
-| **1 - Test offline** | 171 test di autoverifica, non serve nulla acceso |
+| **1 - Test offline** | 172 test di autoverifica, non serve nulla acceso |
 | **2 - Collaudo simulatore** | collaudo su `127.0.0.1:9100` (simulatore acceso) |
 | **4 - Collaudo macchina reale** | collaudo su `192.168.1.231:9100` |
 

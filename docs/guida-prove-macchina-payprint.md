@@ -6,6 +6,40 @@
 
 >! **Tre regole prima di tutto.** Mai lanciare **Fill** (esegue incassi veri). Mai il profilo **6 - Collaudo macchina reale** né il collaudo con i gruppi di default: contiene un pagamento POS vero, la chiusura giornaliera del POS, la sostituzione del logo e l'azzeramento delle banconote. Mai il gruppo **riavvii**. Tutto quello che muove denaro o cambia la configurazione si fa solo dal banco, un comando alla volta, dopo averlo detto alla persona di PayPrint.
 
+## Che cosa leggere prima, e in che ordine
+
+Quattro documenti, un'ora in tutto. Servono tutti: questa guida dice *come* si fanno le prove, non
+*perché*.
+
+| | Documento | Che cosa ti dà | Quanto |
+|---|---|---|---|
+| 1 | `esito-risposta-payprint.md` | che cosa ha già detto il fornitore, i tre difetti trovati, e nel **capitolo 5 le 11 domande da fargli a voce** | 15 min |
+| 2 | `checklist-macchina-reale.md` | le 11 prove in forma di elenco: cosa fare, cosa guardare, cosa decide ciascuna | 10 min |
+| 3 | **questa guida**, capitoli 3, 4 e 5 | come si fanno **su una macchina che non è nostra**: cosa non lanciare mai, i comandi esatti, come leggere il log | 20 min |
+| 4 | `prove-banchi-ramo1-2026-09-16.md` | com'è fatto un log giusto: le stesse prove già eseguite sul simulatore, riga per riga | 10 min |
+
+`decisioni-innesto-giano.md` non serve durante la sessione, ma dice **perché** le prove 4, 5 e 9
+contano: da lì esce la Decisione 1 di Giano.
+
+> **Se leggi una cosa sola**, leggi il capitolo 5 di questa guida con la checklist accanto, e
+> stampa la tabella qui sotto.
+
+### A che cosa serve ciascuna prova
+
+| Prova | Risponde alla domanda (cap. 5 dell'esito) | Che cosa decide |
+|---|---|---|
+| 1 | — | se la libreria parla con quel firmware. Se fallisce, si smette |
+| 2 | 1.1, la pausa | se il default della pausa fra comandi può passare da 80 ms a 0 |
+| 3 | 1, quanti frame dopo un `CM` e quale campo leggere | se la chiusura sul frame con `errorCode` diverso da `OK` vale anche sulla macchina (difetto D1) |
+| 4 | 2 e 10, `CM` a importo superato e `amountPaid` | **Decisione 1 di Giano**: se serve una procedura per rendere l'eccedenza (`PA`) |
+| 5 | 3, `AN` con denaro dentro | **Decisione 1 di Giano**: come si riconosce un rimborso incompleto |
+| 6 | 4, la forma di `BUSY` | se `PagAmicoFrame.IsBusy` riconosce la forma vera |
+| 7 | 7, chiusura forzata | come Giano distingue la chiusura dal pannello da un proprio annullo |
+| 8 | 5, `ER` dopo l'`OK` | se l'`ER` va aggiunto ai frame che chiudono l'incasso |
+| 9 | 6, riconnessione | la forma dell'API di ripresa, e la ripartenza di Giano dopo un riavvio (Decisione 2) |
+| 10 | 8, come ci si accorge che la macchina non risponde | i valori del keepalive, e quindi quando si può togliere il timeout di 5 minuti (difetto D2) |
+| 11 | 9, terminatore dopo i pacchetti immagine | se il CR va escluso dopo i pacchetti binari |
+
 ## 1. Che cosa chiedere a PayPrint prima della sessione
 
 Da concordare per mail o telefono, prima di fissare il giorno.
@@ -138,13 +172,53 @@ Nella console del Tap, oltre al traffico, **si possono scrivere comandi**: una r
 Poi **Connetti**. Nel log devono comparire, in quest'ordine:
 
 ```
-keepalive TCP: prima sonda dopo 10 s, poi ogni 2 s, caduta dopo 5 sonde senza risposta
-connesso a 127.0.0.1:9200 (pausa minima fra invii 80 ms, terminatore presente)
+i   keepalive TCP: prima sonda dopo 10 s, poi ogni 2 s, caduta dopo 5 sonde senza risposta
+i   connesso a 127.0.0.1:9200 (pausa minima fra invii 80 ms, terminatore presente)
++   connesso a 127.0.0.1:9200
 ```
 
-### 4.3 Gli appunti
+Se la riga del keepalive non compare, la diagnostica era spenta al momento di Connetti: disconnetti,
+accendila, riconnetti. Se dice valori diversi da 10 s / 2 s / 5 sonde, il keepalive non è stato
+applicato: con il banco Kotlin succede con un JDK vecchio (serve il 17.0.14 o successivo), ed è la
+prova 10 a farne le spese.
 
-Un file di testo con l'ora: per ogni prova ora di inizio, che cosa si è fatto, che cosa ha fatto fisicamente la macchina (lo racconta la persona di PayPrint).
+### 4.3 Come si legge il log del banco
+
+Una sessione normale, con un incasso chiuso da un `[CM]`, scrive righe di questa forma (dal banco
+WinForms; **dal 16 settembre il banco Compose scrive esattamente le stesse**, importi compresi):
+
+```
+i     [IN] incasso contanti
+TX >  IN000500                                    <- il comando che parte
+i     incasso 'IN000500' accettato: da qui chiudono solo IN, AN e il CM finale
+i     parziale: incassato 2,00 (monete 2,00, banconote 0,00), da incassare 3,00
+i     [CM] commit
+TX >  CM
+RX <  {"response":"CM",...,"errorCode":"OK","committedAmout":0.0}      <- accettazione
+RX <  {"response":"CM",...,"errorCode":"","committedAmout":2.0}        <- esito
++     response=CM  incassato=2,00  trattenuto=2,00 (controllo committedAmount=2,00)
+```
+
+Sei cose da saper riconoscere, per non scambiare il normale per un guasto:
+
+| Riga | Che cosa vuol dire |
+|---|---|
+| `TX >` | il comando è partito davvero. **Dal 16 settembre precede sempre la risposta**: se manca, non è stato trasmesso niente |
+| **due righe `+` identiche** dopo un `[AN]` o un `[CM]` a incasso aperto | normale: l'esito lo restituiscono sia l'attesa dell'incasso sia la chiamata di chiusura. Il comando è partito **una volta sola**, e lo dicono le righe `TX` |
+| `ERR! frame orfano (nessuna attesa lo riconosce): ...` | un messaggio che nessuno stava aspettando. **Da annotare sempre**: può contenere importi, ed è il canale su cui Giano li salverà |
+| `ERR! Incasso aperto: 'ST' non inviato, ...` | il banco ha bloccato un comando laterale: non è un errore della macchina, ed è il comportamento voluto |
+| `ERR! Chiusura dell'incasso gia' richiesta con CM: 'AN' non inviato` | seconda chiusura sullo stesso incasso: nulla trasmesso |
+| `ERR! stato macchina [E0920]: Monete esaurite` | avviso sullo stato della macchina, non esito del comando: si annota e si va avanti |
+
+> **Attenzione all'incasso che si chiude da solo.** Se il denaro inserito raggiunge l'importo
+> richiesto, l'incasso si chiude e i pulsanti premuti dopo finiscono su un incasso **già chiuso**:
+> la macchina risponde lo stesso, ma la prova non prova più niente. Per questo le prove 3-9 chiedono
+> di inserire **meno** dell'importo richiesto. Nel log si riconosce dalla riga
+> `incasso 'IN000500' chiuso` comparsa **prima** del click.
+
+### 4.4 Gli appunti
+
+Un file di testo con l'ora: per ogni prova ora di inizio, che cosa si è fatto, che cosa ha fatto fisicamente la macchina (lo racconta la persona di PayPrint). Alla fine della sessione i log valgono più degli appunti, ma solo gli appunti dicono che cosa è successo **fisicamente**.
 
 ---
 

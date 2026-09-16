@@ -30,6 +30,14 @@ tre si vedeva nel collaudo: il collaudo passa lo stesso.
 > macchina vera e dopo il keepalive regolato (punto 12). Il dettaglio, e tre cose emerse facendo
 > il lavoro, sono in fondo al capitolo 3.
 
+> **Aggiornamento del 16 settembre.** Le correzioni dell'11 settembre sono state **provate a mano
+> sui due banchi**, sul simulatore, e reggono: il verbale riga per riga è in
+> `prove-banchi-ramo1-2026-09-16.md`. In particolare si è vista dal vivo la forma dei **due frame
+> `CM`** su cui si gioca D1 — accettazione con `errorCode` `OK` e `committedAmout` 0, esito con
+> `errorCode` vuoto e l'importo — e il canale dei **frame orfani**, che arriva al chiamante con gli
+> importi dentro. Nella stessa sessione è emersa e corretta una cosa che confondeva i log: la riga
+> del comando usciva **dopo** la risposta (§3, punto 14). D2 resta l'unico dei tre difetti aperto.
+
 ---
 
 ## 1. Domanda per domanda
@@ -109,7 +117,7 @@ attese Kotlin alla caduta della connessione, che era l'altro prerequisito, è fa
 > `netstandard2.0`/`net47` il numero di sonde resta quello di Windows (10); in Kotlin la regolazione
 > richiede una JVM che la supporti — su Windows **17.0.14 e 17.0.20 sì, 17.0.8 no** (verificati) — e
 > su Android non è disponibile: resta il keepalive di sistema e la diagnostica lo segnala. Test
-> offline in entrambe le librerie (oggi 170 in C#, 171 in Kotlin). **Non ancora provato con un cavo staccato**: è la prova 10
+> offline in entrambe le librerie (oggi 171 in C#, 172 in Kotlin). **Non ancora provato con un cavo staccato**: è la prova 10
 > di `checklist-macchina-reale.md`. Il timeout di 5 minuti resta finché quella prova non conferma.
 
 ### D3 — un testo qualsiasi chiude l'incasso
@@ -237,6 +245,15 @@ stessi nomi; i test offline passano da 121 a **168 per parte**, i collaudi resta
 > due librerie e nei due banchi; collaudo 64/64 con CR sia a 80 ms sia a 0 ms, in C# e in Kotlin.
 > La raffica non perde più comandi sul simulatore attuale, **nemmeno senza terminatore**: il
 > difetto non si riproduce. Dettagli in `prova-terminatore-cr-2026-09-14.md`.
+
+**Senza macchina, il 16 settembre:**
+
+14. **La riga del comando esce prima dei byte.** `CommandSent` / `onCommandSent` era sollevato dopo
+    la scrittura sul socket: su `127.0.0.1` la risposta veniva registrata **prima** del comando che
+    l'ha provocata, e un log con dentro un incasso diventava illeggibile. Ora la notifica è chiamata
+    sotto il lock di scrittura, subito prima dei byte, nelle due librerie e anche per i pacchetti
+    immagine. Un test offline per parte lo fissa (171 in C#, 172 in Kotlin), e i due collaudi restano
+    64 su 64 sul simulatore. Conta per le prove sulla macchina: è il log che le documenta.
 
 **Con una macchina vera** (quella di Viglione da remoto, o la nostra):
 

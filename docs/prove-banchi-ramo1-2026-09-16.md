@@ -111,16 +111,21 @@ perderebbero: Decisione 2 di `decisioni-innesto-giano.md`.
 
 ---
 
-## Tre cose emerse, da tenere presenti
+## Tre cose emerse — due corrette lo stesso giorno
 
-- **La riga `TX >` può comparire dopo la risposta.** In C# l'evento `CommandSent` è sollevato
-  *dopo* la scrittura sul socket (`PagAmicoClient.cs:262`), e su `127.0.0.1` la risposta a volte
-  viene letta prima: nel log del `[CM]` la riga `RX` è a `.279` e il `TX > CM` a `.287`. È solo
-  l'ordine delle righe, non dei byte, ma leggendo un log confonde — e confonderà di più con il Tap
-  in mezzo. Da valutare se spostare l'evento prima della scrittura, nelle due librerie insieme.
-- **I due banchi formattano gli importi in modo diverso**: WinForms `800,00` (formato `0.00`),
-  Compose `800.0` (il `toString` di `BigDecimal`). Divergenza dei banchi, non delle librerie;
-  costa poco uniformarla.
+- **La riga `TX >` compariva dopo la risposta. Corretta.** L'evento `CommandSent` /
+  `onCommandSent` era sollevato *dopo* la scrittura sul socket, e su `127.0.0.1` la risposta a volte
+  veniva letta prima: nel log del `[CM]` la riga `RX` era a `.279` e il `TX > CM` a `.287`. Era
+  l'ordine delle righe, non dei byte, ma un log con dentro un incasso diventava illeggibile — e con
+  il Tap in mezzo lo sarebbe stato di più. La notifica è ora chiamata sotto il lock di scrittura,
+  subito prima dei byte, **nelle due librerie** e anche per i pacchetti immagine; un test offline
+  per parte lo fissa (171 in C#, 172 in Kotlin) e i due collaudi restano 64 su 64. Nel log del
+  collaudo del 16 settembre il `TX ST` precede ora la lettura dal socket.
+- **I due banchi formattavano gli importi in modo diverso. Uniformati.** WinForms `800,00` (formato
+  `0.00`), Compose `800.0` (il `toString` di `BigDecimal`): due log della stessa prova non si
+  potevano confrontare. Il banco Compose ha ora l'helper `BigDecimal?.eur()` con lo stesso formato,
+  usato nel riepilogo e nei parziali; verificato sul simulatore
+  (`parziale: incassato 1,00 (monete 1,00, banconote 0,00), da incassare 0,50`).
 - **Un incasso rifiutato si riconosce.** Un tentativo con importo malformato è partito come
   `IN000000` e la macchina ha risposto `CMD ERROR`: la libreria ha chiuso con
   `Incasso 'IN000000' rifiutato: CMD ERROR`, cioè `PagAmicoRejectedException`. È il predicato in due
@@ -136,6 +141,6 @@ basta `Fill` (monete) o uno scarico banconote dal pannello.
 
 ## Che cosa resta del ramo 1
 
-Niente: i punti 1-6 sono chiusi. **Non** sono state toccate le cose che vanno dopo le prove sulla
+Niente: i punti 1-6 sono chiusi, e le due correzioni nate da questa sessione sono fatte e provate. **Non** sono state toccate le cose che vanno dopo le prove sulla
 macchina vera: default del terminatore, pausa di 80 ms, timeout di 5 minuti (D2), chiusura
 dell'incasso su `ER` dopo l'`OK`.

@@ -240,7 +240,7 @@ Più circa 1.200 righe di documentazione in Markdown e due manuali PDF generati.
 
 ### Lo stato della verifica
 
-- **Test offline** tutti superati: **170 in C#, 171 in Kotlin**. 86 confrontano le stringhe
+- **Test offline** tutti superati: **171 in C#, 172 in Kotlin**. 86 confrontano le stringhe
   generate con gli esempi letterali dei manuali, carattere per carattere; 63 in C# e 64 in Kotlin
   fanno parlare il client vero con un finto pagAmico su 127.0.0.1 (sequenze di incasso, comandi
   semplici, invio, keepalive); 21 provano il registro su file, anche con tre processi veri, e il

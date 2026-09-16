@@ -4,14 +4,16 @@
 > a casa in `D:\Programmazione\Prime\PerClaude\payPrint`, in ufficio in
 > `C:\Users\adamo\Desktop\Prime\payPrint`; ciascuno con i remote `github` e
 > `HardDiskEsterno` (`docs/avvio-progetti.md`). Fatti dopo l'11 settembre: terminatore CR di default,
-> keepalive TCP regolato (10 s / 2 s / 5 sonde), test offline **170 in C# e 171 in Kotlin**, Tap con
+> keepalive TCP regolato (10 s / 2 s / 5 sonde), test offline **171 in C# e 172 in Kotlin**, Tap con
 > comandi dalla console, banco Kotlin impacchettato. Decisioni per Giano: **replicare il VNE** con il
 > log degli importi, Decisione 1 rimandata alle prove 4 e 5 (`docs/decisioni-innesto-giano.md`). Le
 > prove sulla macchina di PayPrint si preparano con `docs/guida-prove-macchina-payprint.pdf`.
 >
 > **16 settembre: il ramo 1 è chiuso.** Le cinque prove a mano sono state eseguite sul simulatore
 > nei due banchi e **superate tutte**, `cancelCurrent()` è stata tolta dal banco Compose: verbale in
-> `prove-banchi-ramo1-2026-09-16.md`. Restano il ramo 2 (le prove sulla macchina) e il ramo 3 (le
+> `prove-banchi-ramo1-2026-09-16.md`. Dalla sessione sono uscite due correzioni: nelle due librerie
+> **la riga del comando esce ora prima dei byte** (prima il log poteva mostrare la risposta prima del
+> comando), e il banco Compose scrive gli importi come il WinForms (`800,00`, non `800.0`). Restano il ramo 2 (le prove sulla macchina) e il ramo 3 (le
 > decisioni contabili). Il resto di questa sezione è la situazione all'11 settembre.
 
 **PayPrint ha risposto** (11 settembre, `docs/risposta-payprint-2026-09-11.md`), e l'analisi

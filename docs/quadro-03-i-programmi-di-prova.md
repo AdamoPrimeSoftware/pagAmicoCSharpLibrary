@@ -62,6 +62,12 @@ banco Kotlin l'interrogazione dei movimenti è **fissa a oggi**, mentre su WinFo
 l'intervallo di date. Le altre sono minori — il Compose non copia negli appunti ma esporta su
 file, e i campi numerici sono liberi invece che con limiti.
 
+**E scrivono le stesse righe di log.** Dal 16 settembre anche gli importi: il banco Compose
+scriveva `incassato=800.0` dove il WinForms scrive `incassato=800,00`, e due log della stessa prova
+non si potevano confrontare. Ora tutti e due usano due decimali e il separatore della lingua del PC.
+Le cinque prove a mano del 16 settembre, eseguite sul simulatore in tutti e due i banchi, hanno dato
+righe identiche: `prove-banchi-ramo1-2026-09-16.md`.
+
 ---
 
 ## 2. Il collaudo
@@ -225,7 +231,7 @@ il primo controllo della giornata: se fallisce qui, non ha senso collegarsi.
 Non usano nessun framework di test: sono un normale programma con tre primitive scritte a mano.
 Scelta coerente col resto — zero dipendenze, si lancia e basta.
 
-### Che cosa verificano i test (170 in C#, 171 in Kotlin)
+### Che cosa verificano i test (171 in C#, 172 in Kotlin)
 
 Dove i numeri differiscono, il primo è C# e il secondo Kotlin. L'unico test in più di Kotlin
 riguarda la cancellazione delle coroutine: in C# l'annullo col token restituisce l'esito, in Kotlin

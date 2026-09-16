@@ -5,17 +5,24 @@ Libreria client per la cassa rendiresto **PayPrint pagAmico** (protocollo TCP-IP
 | Progetto | Contenuto |
 |---|---|
 | `PayPrint.PagAmico` | libreria (`net8.0`, `netstandard2.0`, `net47`; sui target legacy la sola dipendenza `System.Text.Json`) |
-| `PayPrint.PagAmico.Tests` | 170 test offline: stringhe dei manuali, sequenze di incasso contro un finto pagAmico, registro su file |
+| `PayPrint.PagAmico.Tests` | 171 test offline: stringhe dei manuali, sequenze di incasso contro un finto pagAmico, registro su file |
 
 Le app di prova (WinForms, LiveTest, Tap, Fill, Demo) stanno nel repository **pagAmico_CSharp_Demo**.
 
-Questo repository contiene anche la documentazione di tutto l'SDK (C# e Kotlin):
+Questo repository contiene anche la documentazione di tutto l'SDK (C# e Kotlin). In `docs/` **i PDF
+sono generati dai `.md`** con `genera_pdf_da_md.py`: si modifica il sorgente e si rilancia, mai il PDF
+a mano.
 
-- [`docs/avvio-progetti.md`](docs/avvio-progetti.md): **come avviare i 4 progetti**
-- [`docs/guida-prove-macchina-payprint.pdf`](docs/guida-prove-macchina-payprint.pdf): come condurre le prove sulla macchina di PayPrint (dal `.md` con `genera_pdf_da_md.py`)
-- `docs/quadro-01..05-*`: documenti di orientamento, da leggere in ordine a partire da `quadro-01-quadro-insieme.pdf`
-- `docs/Integrazione-pagAmico.pdf`, `docs/Guida-prove-pagAmico.pdf`: manuali tecnici (generati dagli script `genera_*.py`, non modificare i PDF a mano)
-- `strumenti/analizza_log.py`: rilegge i log di una sessione di prove
+| Se devi… | Leggi |
+|---|---|
+| avviare i 4 progetti su un PC nuovo | [`avvio-progetti.md`](docs/avvio-progetti.md) |
+| capire dove siamo, in generale | `docs/quadro-01..05-*`, in ordine, da [`quadro-01-quadro-insieme.pdf`](docs/quadro-01-quadro-insieme.pdf) |
+| **preparare le prove sulla macchina di PayPrint** | [`guida-prove-macchina-payprint.pdf`](docs/guida-prove-macchina-payprint.pdf): comincia da lì, dice che cosa leggere prima, in che ordine, e a che cosa serve ogni prova |
+| condurre le prove, foglio alla mano | [`checklist-macchina-reale.pdf`](docs/checklist-macchina-reale.pdf), le 11 prove |
+| sapere com'è fatto un log giusto | [`prove-banchi-ramo1-2026-09-16.pdf`](docs/prove-banchi-ramo1-2026-09-16.pdf): le stesse prove eseguite sul simulatore, riga per riga |
+| sapere che cosa ha detto il fornitore e che cosa chiedergli | [`esito-risposta-payprint.pdf`](docs/esito-risposta-payprint.pdf), con le 11 domande nel capitolo 5 |
+| il dettaglio del protocollo, o dei programmi di prova | [`Integrazione-pagAmico.pdf`](docs/Integrazione-pagAmico.pdf), [`Guida-prove-pagAmico.pdf`](docs/Guida-prove-pagAmico.pdf) |
+| rileggere i log di una sessione | `strumenti/analizza_log.py` |
 
 ## Compilare e testare
 

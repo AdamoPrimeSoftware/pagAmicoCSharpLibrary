@@ -4,6 +4,18 @@ Scopo: chiudere in una sola sessione i punti che il simulatore non permette di v
 (`esito-risposta-payprint.md`, capitolo 3 punti 11-13 e capitolo 5). Ogni prova dice **cosa fare**,
 **cosa guardare** e **cosa decide**.
 
+> **Su quale macchina.** Questo elenco è scritto per una macchina **nostra**. Sulla macchina di
+> PayPrint vale `guida-prove-macchina-payprint.md`, che ha la stessa numerazione ma regole più
+> strette su che cosa si può lanciare: in caso di contrasto, comanda la guida. Lì c'è anche l'ordine
+> di lettura da seguire prima della sessione e il capitolo su come si legge il log del banco.
+>
+> **Le stesse prove, dove si potevano fare, sono già state eseguite sul simulatore** il 16 settembre:
+> `prove-banchi-ramo1-2026-09-16.md` mostra le righe che il banco scrive quando tutto funziona.
+>
+> **Inserire sempre meno dell'importo richiesto.** Se il denaro inserito raggiunge l'importo, la
+> macchina chiude l'incasso da sola e i pulsanti premuti dopo finiscono su un incasso già chiuso: la
+> prova sembra riuscita e non ha provato niente.
+
 ## Prima di iniziare
 
 - [ ] Indirizzo e porta della macchina (in queste note `192.168.1.231:9100`)
