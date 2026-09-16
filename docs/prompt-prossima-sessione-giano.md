@@ -1,7 +1,8 @@
 ## Dove siamo
 
-> **Aggiornamento del 15 settembre.** L'SDK è diviso in **quattro repository** affiancati in
-> `D:\Programmazione\Prime\PerClaude\payPrint` (a casa), ciascuno con i remote `github` e
+> **Aggiornamento del 15 settembre.** L'SDK è diviso in **quattro repository** affiancati:
+> a casa in `D:\Programmazione\Prime\PerClaude\payPrint`, in ufficio in
+> `C:\Users\adamo\Desktop\Prime\payPrint`; ciascuno con i remote `github` e
 > `HardDiskEsterno` (`docs/avvio-progetti.md`). Fatti dopo l'11 settembre: terminatore CR di default,
 > keepalive TCP regolato (10 s / 2 s / 5 sonde), test offline **170 in C# e 171 in Kotlin**, Tap con
 > comandi dalla console, banco Kotlin impacchettato. Decisioni per Giano: **replicare il VNE** con il
@@ -59,14 +60,20 @@ fondo e cancellando gli altri due.
 
 ---
 
-Contesto. Due posti:
+Contesto. Due posti, con percorsi diversi sui due PC:
 
-- `D:\Programmazione\Prime\PerClaude\payPrint` — l'SDK pagAmico in quattro repository affiancati:
+| | PC di casa | PC dell'ufficio |
+|---|---|---|
+| SDK pagAmico | `D:\Programmazione\Prime\PerClaude\payPrint` | `C:\Users\adamo\Desktop\Prime\payPrint` |
+| Giano | `D:\Programmazione\Prime\PerClaude\GianoITA` | `C:\Users\adamo\Desktop\Prime\Programmi_x_Claude\GianoITA` |
+| disco esterno | `G:\git-payprint-repos` | `E:\git-payprint-repos` |
+
+- **L'SDK pagAmico**, in quattro repository affiancati:
 `pagAmico_CSharp_Lib` (libreria C# multi-target, test, documentazione, analizzatore di log),
 `pagAmico_CSharp_Demo` (banco WinForms, collaudo, Tap, Fill, Demo), `pagAmico_Kotlin_Lib`
 (libreria gemella Kotlin, test, collaudo), `pagAmico_Kotlin_Demo` (banco Compose). Remote `github`
 e `HardDiskEsterno` (G: a casa, E: in ufficio): prima di iniziare `git pull` in tutti e quattro.
-- `D:\Programmazione\Prime\PerClaude\GianoITA` — Giano, il nostro gestionale, che pilota già una
+- **Giano**, il nostro gestionale, che pilota già una
 cassa automatica **VNE** e a cui va aggiunto il pagAmico **accanto**, non al suo posto.
 **Leggi prima questi, in quest'ordine, e non rifare il lavoro che contengono** (tutti in
 `pagAmico_CSharp_Lib\docs`):
@@ -136,7 +143,9 @@ mai il PDF.
 dell'esito e la seconda passata sui test sono fatti dall'11 settembre: non rifarli)*
 
 I due banchi (WinForms e Compose) compilano, ma dopo le modifiche dell'11 settembre nessuno li ha
-aperti. Sul simulatore, in tutti e due:
+aperti. La scheda pronta da eseguire, con i messaggi attesi riga per riga, è
+`prove-banchi-ramo1-2026-09-16.md`; il **punto 6 è già fatto** (16 settembre: `cancelCurrent()`
+tolta dal banco Compose). Sul simulatore, in tutti e due:
 
 1. Un incasso, poi `[AN]` a incasso aperto: deve comparire l'esito dell'incasso.
 2. Un incasso, poi `[CM]`: il trattenuto letto da `collectedAmount`.
@@ -144,7 +153,8 @@ aperti. Sul simulatore, in tutti e due:
 trasmesso.
 4. Un altro comando a incasso aperto (stato, display): errore di incasso aperto, nulla trasmesso.
 5. I frame orfani nel log (per esempio i parziali di una ricarica `VS`).
-6. Nel banco Compose `cancelCurrent()` non la usa più nessuno: toglierla o ricollegarla.
+6. ~~Nel banco Compose `cancelCurrent()` non la usa più nessuno: toglierla o ricollegarla.~~
+   **Fatto il 16 settembre**: tolta, il `[AN]` usa `cancelOperation()`.
 
 **Non** toccare ancora: il default del terminatore, la pausa, il timeout (D2), la chiusura
 dell'incasso su `ER` dopo l'`OK`. Quelli vanno dopo le prove.

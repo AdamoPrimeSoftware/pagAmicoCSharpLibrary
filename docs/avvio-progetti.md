@@ -29,7 +29,7 @@ quindi `git pull` e `git push` senza argomenti lavorano con GitHub.
 | ufficio | `C:\Users\adamo\Desktop\Prime\payPrint` | `E:\git-payprint-repos` |
 
 ```bash
-cd D:\Programmazione\Prime\PerClaude\payPrint      # cartella sul PC di casa
+cd D:\Programmazione\Prime\PerClaude\payPrint      # a casa; in ufficio C:\Users\adamo\Desktop\Prime\payPrint
 git clone -o github https://AdamoPrimeSoftware@github.com/AdamoPrimeSoftware/pagAmicoCSharpLibrary.git  pagAmico_CSharp_Lib
 git clone -o github https://AdamoPrimeSoftware@github.com/AdamoPrimeSoftware/pagAmicoCSharpDemo.git     pagAmico_CSharp_Demo
 git clone -o github https://AdamoPrimeSoftware@github.com/AdamoPrimeSoftware/pagAmicoKotlinLibrary.git  pagAmico_Kotlin_Lib
@@ -89,13 +89,19 @@ Se `git branch -vv` non mostra `[github/main]` accanto a `main` (per esempio dop
 | Script in `docs/` e `strumenti/` | Python 3 |
 
 Il JDK di Gradle si fissa una volta per PC in `%USERPROFILE%\.gradle\gradle.properties`, non nei
-repository (il percorso cambia da un PC all'altro):
+repository (il percorso cambia da un PC all'altro; in ufficio è quello qui sotto):
 
 ```
-org.gradle.java.home=C:\\Users\\adamo\\.jdks\\ms-17.0.20.1
+org.gradle.java.home=C:/Users/adamo/.jdks/corretto-17.0.20.1
 ```
 
 In IntelliJ, *Settings → Build Tools → Gradle → Gradle JVM* sullo stesso JDK.
+
+> **Il `java` del PATH non c'entra con quello di Gradle.** In ufficio il PATH ha la **17.0.8**, che
+> non regola il keepalive TCP: `gradlew` e IntelliJ usano comunque il JDK di `gradle.properties`, ma
+> un banco lanciato a mano con quel `java` resterebbe col keepalive di sistema, prima sonda dopo due
+> ore. Si controlla con `java -version` e, nel banco, sulla riga di diagnostica che compare alla
+> connessione. Conta per la prova 10 di `checklist-macchina-reale.md`.
 
 ### Simulatore
 

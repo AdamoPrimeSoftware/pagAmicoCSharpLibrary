@@ -170,8 +170,8 @@ soprattutto non toccano la parte difficile, che è la **ricezione**.
 La prova che serviva: **i primi due difetti veri del progetto li ha trovati il collaudo, non i
 test.** Nessuno dei due era visibile offline, perché entrambi riguardano il *tempo* — anche se il
 primo, i comandi ravvicinati, per il fornitore non si presenta se i comandi terminano con CR o
-CR+LF, cosa che le librerie oggi non fanno, e sul simulatore *probabilmente* c'entra una sua
-difficoltà: va provato. I tre venuti fuori dopo, con la risposta di PayPrint, il collaudo invece
+CR+LF — e dal 14 settembre le librerie chiudono ogni comando con CR. Sul simulatore attuale quel
+difetto non si riproduce più, nemmeno senza terminatore: resta da provare su una macchina vera. I tre venuti fuori dopo, con la risposta di PayPrint, il collaudo invece
 non li vedeva: passava lo stesso (D1-D3 in `esito-risposta-payprint.md`). D1 e D3 sono stati
 corretti l'11 settembre, con test offline di sequenza scritti apposta; D2 aspetta la macchina vera.
 
