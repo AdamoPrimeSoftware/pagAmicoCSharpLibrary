@@ -9,19 +9,21 @@ Libreria client per la cassa rendiresto **PayPrint pagAmico** (protocollo TCP-IP
 
 Le app di prova (WinForms, LiveTest, Tap, Fill, Demo) stanno nel repository **pagAmico_CSharp_Demo**.
 
-Questo repository contiene anche la documentazione di tutto l'SDK (C# e Kotlin). In `docs/` **i PDF
-sono generati dai `.md`** con `genera_pdf_da_md.py`: si modifica il sorgente e si rilancia, mai il PDF
-a mano.
+Questo repository contiene anche la documentazione di tutto l'SDK (C# e Kotlin), in [`docs/`](docs/):
+i sorgenti in `docs/md/<tipo>/`, i PDF **generati** in `docs/pdf/<stesso tipo>/`. Si modifica il `.md`
+e si rilancia `python docs\generatori\genera_pdf_da_md.py`, mai il PDF a mano. L'indice completo,
+con il significato dei cinque tipi, è in [`docs/README.md`](docs/README.md).
 
 | Se devi… | Leggi |
 |---|---|
-| avviare i 4 progetti su un PC nuovo | [`avvio-progetti.md`](docs/avvio-progetti.md) |
-| capire dove siamo, in generale | `docs/quadro-01..05-*`, in ordine, da [`quadro-01-quadro-insieme.pdf`](docs/quadro-01-quadro-insieme.pdf) |
-| **preparare le prove sulla macchina di PayPrint** | [`guida-prove-macchina-payprint.pdf`](docs/guida-prove-macchina-payprint.pdf): comincia da lì, dice che cosa leggere prima, in che ordine, e a che cosa serve ogni prova |
-| condurre le prove, foglio alla mano | [`checklist-macchina-reale.pdf`](docs/checklist-macchina-reale.pdf), le 11 prove |
-| sapere com'è fatto un log giusto | [`prove-banchi-ramo1-2026-09-16.pdf`](docs/prove-banchi-ramo1-2026-09-16.pdf): le stesse prove eseguite sul simulatore, riga per riga |
-| sapere che cosa ha detto il fornitore e che cosa chiedergli | [`esito-risposta-payprint.pdf`](docs/esito-risposta-payprint.pdf), con le 11 domande nel capitolo 5 |
-| il dettaglio del protocollo, o dei programmi di prova | [`Integrazione-pagAmico.pdf`](docs/Integrazione-pagAmico.pdf), [`Guida-prove-pagAmico.pdf`](docs/Guida-prove-pagAmico.pdf) |
+| avviare i 4 progetti su un PC nuovo | [`avvio-progetti.md`](docs/md/guide/avvio-progetti.md) |
+| capire dove siamo, in generale | i cinque quadri, in ordine, da [`quadro-01-quadro-insieme.pdf`](docs/pdf/guide/quadro-01-quadro-insieme.pdf) |
+| **preparare le prove sulla macchina di PayPrint** | [`guida-prove-macchina-payprint.pdf`](docs/pdf/guide/guida-prove-macchina-payprint.pdf): comincia da lì, dice che cosa leggere prima, in che ordine, e a che cosa serve ogni prova |
+| condurre le prove, foglio alla mano | [`checklist-macchina-reale.pdf`](docs/pdf/checklist/checklist-macchina-reale.pdf), le 11 prove |
+| sapere com'è fatto un log giusto | [`prove-banchi-ramo1-2026-09-16.pdf`](docs/pdf/verbali/prove-banchi-ramo1-2026-09-16.pdf): le stesse prove eseguite sul simulatore, riga per riga |
+| sapere che cosa ha detto il fornitore e che cosa chiedergli | [`esito-risposta-payprint.pdf`](docs/pdf/memoria-claude/esito-risposta-payprint.pdf), con le 11 domande nel capitolo 5 |
+| il dettaglio del protocollo, o dei programmi di prova | [`Integrazione-pagAmico.pdf`](docs/pdf/guide/Integrazione-pagAmico.pdf), [`Guida-prove-pagAmico.pdf`](docs/pdf/guide/Guida-prove-pagAmico.pdf) |
+| riprendere il lavoro in una sessione nuova (anche con Claude) | [`prompt-ripresa-lavoro.md`](docs/md/memoria-claude/prompt-ripresa-lavoro.md) |
 | rileggere i log di una sessione | `strumenti/analizza_log.py` |
 
 ## Compilare e testare
