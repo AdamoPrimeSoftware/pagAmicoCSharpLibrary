@@ -1,129 +1,141 @@
 # Prove a mano dei due banchi — ramo 1
 
-*16 settembre 2026. Scopo: verificare sul simulatore che i due banchi (WinForms e Compose) si
-comportino come le librerie corrette l'11 settembre. Sono le prove del ramo 1 di
-`prompt-prossima-sessione-giano.md`. Nessuna richiede la macchina vera.*
+*16 settembre 2026. Le cinque prove del ramo 1 di `prompt-prossima-sessione-giano.md`, eseguite sul
+simulatore del Dev Kit con il banco WinForms e con il banco Compose. **Tutte e cinque superate in
+tutti e due i banchi**, con gli stessi messaggi. Nessuna richiedeva la macchina vera.*
 
-**Il punto 6 del ramo 1 è già fatto:** `cancelCurrent()`, che nel banco Compose non chiamava più
-nessuno, è stata tolta. Il pulsante `[AN]` usa `cancelOperation()`, come il `[AN]` del WinForms usa
-`CancelAsync()`: a incasso aperto passano per la via laterale e restituiscono **l'esito
-dell'incasso**.
-
----
-
-## Preparazione
-
-1. **Simulatore acceso**: Dev Kit → *Simulatore* → **Avvia** (ascolta su `127.0.0.1:9100`).
-2. **Giacenze piene**, altrimenti i resti falliscono per mancanza di monete:
-
-   ```bash
-   cd pagAmico_CSharp_Demo
-   dotnet run --project PayPrint.PagAmico.Fill -- 127.0.0.1 9100 --monete 40 --banconote 600 --aggiorna-fondo
-   ```
-
-3. **Il banco da provare** (le prove si ripetono su tutti e due):
-
-   ```bash
-   dotnet run --project PayPrint.PagAmico.WinForms          # oppure F5 da Visual Studio
-   cd ../pagAmico_Kotlin_Demo && gradlew.bat :pagamico-desktop:run
-   ```
-
-4. Nella scheda **Connessione**: host `127.0.0.1`, porta `9100`, terminatore `\r`, e **attivare
-   diagnostica libreria e registrazione su file**. Poi *Connetti*.
-
-> **Il criterio che vale in tutte le prove: le righe `TX`.** Il banco scrive una riga `TX` per ogni
-> comando che parte davvero. Quando una prova dice «nulla trasmesso», vuol dire che in quel momento
-> nel log **non** deve comparire una nuova riga `TX`.
+**Punto 6 del ramo 1: fatto.** `cancelCurrent()`, che nel banco Compose non chiamava più nessuno, è
+stata tolta. Il `[AN]` usa `cancelOperation()`, come il `[AN]` del WinForms usa `CancelAsync()`: a
+incasso aperto passano per la via laterale e restituiscono **l'esito dell'incasso**.
 
 ---
 
-## 1. Incasso, poi `[AN]` a incasso aperto
+## Com'è stata condotta la sessione
 
-**Fare:** scheda *Incasso*, importo `5.00`, `[IN] Contanti`. Inserire 2,00 € dal pannello del
-simulatore, aspettare la riga del parziale, poi premere `[AN] Annulla`.
+Simulatore del Dev Kit su `127.0.0.1:9100`, giacenze riempite con `Fill` (monete 57,50, banconote
+620,00), terminatore `\r`, **diagnostica libreria** e **registrazione su file** accese in tutti e due
+i banchi. I log sono `winforms-2026-09-16.log` e `compose-2026-09-16.log` in
+`%LOCALAPPDATA%\PayPrint.PagAmico\logs`.
 
-**Deve comparire:**
+> **Il cliente virtuale del simulatore inserisce circa 200 € al secondo.** È la cosa da sapere per
+> ripetere queste prove: con importi piccoli l'incasso **si chiude da solo** prima che si riesca a
+> premere un pulsante, e i click finiscono su un incasso già chiuso (è successo due volte, ed è il
+> motivo per cui i primi tentativi non provavano quello che dovevano). Con **3.000 €** la finestra
+> è di una quindicina di secondi, con **9.000 €** di circa quarantacinque: sono gli importi usati
+> qui. Il tetto del protocollo è 9.999,99 €.
+>
+> Nel collaudo automatico lo stesso problema è gestito diversamente: `[IN]+[CM]` aspetta 2,5 s e, se
+> l'incasso è già chiuso, lo dice e suggerisce di alzare *«Ritardo fra un pezzo e l'altro»* nel
+> simulatore.
 
-- `TX  AN` una volta sola;
-- una riga di esito con `response=AN` e gli importi: `incassato=2,00` e `restituito=2,00`
-  (il nome dei campi dipende da come risponde il simulatore);
-- **niente** «operazione annullata dal client»: l'annullo non passa più dalla cancellazione del
-  chiamante.
-
-**Decide:** che il pulsante `[AN]` restituisca l'esito dell'incasso e non un esito vuoto.
-
-**Esito:**
-
-## 2. Incasso, poi `[CM]`
-
-**Fare:** `[IN] Contanti` da `5.00`, inserire 2,00 €, poi `[CM] Commit`.
-
-**Deve comparire:** una riga con `response=CM` e
-`trattenuto=2,00 (controllo committedAmount=2,00)`.
-
-- Se i due importi sono **diversi**, copiare la riga: è la domanda 1 della telefonata.
-- Se il trattenuto è **0,00**, il difetto D1 è tornato: fermarsi e segnalarlo.
-- Un eventuale **terzo frame `CM`** in ritardo comparirà come *frame orfano*: annotarlo, è la stessa
-  domanda 1.
-
-**Esito:**
-
-## 3. Seconda chiusura sullo stesso incasso
-
-**Fare:** `[IN] Contanti`, inserire qualcosa, premere `[CM] Commit` e **subito dopo** `[AN] Annulla`
-(due pulsanti diversi, quindi il secondo click è possibile).
-
-**Deve comparire** una riga di errore, una delle due, **e nessuna nuova riga `TX`**:
-
-| Se il commit è ancora in corso | `Chiusura dell'incasso gia' richiesta con CM: 'AN' non inviato` |
-|---|---|
-| Se il commit si è già chiuso | `Nessun incasso aperto: 'AN' non inviato` |
-
-Sul simulatore il `CM` risponde in pochi millisecondi, quindi il secondo messaggio è il più
-probabile: va bene lo stesso, **quello che conta è che non parta un secondo comando**.
-
-**Esito:**
-
-## 4. Un altro comando a incasso aperto
-
-**Fare:** con un incasso aperto (non chiuderlo), andare nella scheda *Contanti* e premere
-`[ST] Richiesta situazione`; poi provare anche un comando del display.
-
-**Deve comparire:**
-`Incasso aperto: 'ST' non inviato, durante l'incasso la macchina accetta solo AN e CM`,
-**senza** riga `TX`. Con la diagnostica accesa compare anche
-`'ST' NON inviato: incasso aperto, la macchina accetta solo AN e CM`.
-
-Poi chiudere l'incasso con `[AN]`.
-
-**Decide:** che il blocco degli invii laterali (punto 4 delle correzioni dell'11 settembre) regga
-anche premendo i pulsanti a mano.
-
-**Esito:**
-
-## 5. Frame orfani nel log
-
-**Fare:** scheda *Ricarica*, premere `[RC/RS/VC/VS] Mista`, inserire qualche moneta nel simulatore,
-poi `[FR] Fine ricarica`.
-
-**Deve comparire:** una o più righe
-`frame orfano (nessuna attesa lo riconosce): ...` con dentro i parziali della ricarica.
-
-**Decide:** che i messaggi che nessuno attende arrivino davvero all'evento dei frame orfani — è il
-canale su cui in Giano si salveranno gli importi (Decisione 2 di `decisioni-innesto-giano.md`).
-
-**Esito:**
+Il criterio comune a tutte le prove sono le righe `TX`: il banco ne scrive una per ogni comando che
+parte davvero, quindi «nulla trasmesso» si legge lì.
 
 ---
 
-## Dopo le prove
+## 1. Incasso, poi `[AN]` a incasso aperto — **superata**
 
-- I log stanno in `%LOCALAPPDATA%\PayPrint.PagAmico\logs` (`winforms-*` e `compose-*`); si rileggono
-  con `python strumenti\analizza_log.py`.
-- Riportare gli esiti qui sopra, e segnalare: righe con importi diversi da quelli attesi, frame
-  orfani inattesi, qualunque differenza fra il banco WinForms e quello Compose.
-- Se una prova fallisce, la correzione va fatta **nelle due librerie insieme**, con un test offline
-  che riproduce i frame visti.
+Incasso da 3.000 € (WinForms) e da 9.000 € (Compose), `[AN]` premuto con 800 € già inseriti.
 
-**Non** toccare in questa sessione: il default del terminatore, la pausa di 80 ms, il timeout di 5
-minuti (D2) e la chiusura dell'incasso su `ER` dopo l'`OK`. Vanno dopo le prove sulla macchina vera.
+```
+WinForms  09:20:23.866  i     [AN] annullo
+          09:20:23.882  i     attesa di 'IN300000' soddisfatta da: {"response":"AN",...}
+          09:20:23.885  TX >  AN
+          09:20:23.887  +     response=AN  incassato=800,00  restituito=800,00  Id=7245  errorType=OK
+          09:20:23.923  +     response=AN  incassato=800,00  restituito=800,00  Id=7245  errorType=OK
+Compose   09:28:40.118  +     response=AN  incassato=800.0  restituito=800.0  Id=7246  errorType=OK
+```
+
+L'esito dell'incasso compare, con gli importi, e il denaro è stato restituito. Un solo `TX > AN`.
+
+**Le due righe di riepilogo identiche sono corrette:** una la scrive l'attesa dell'`[IN]`, l'altra
+la chiamata di `[AN]`, che dall'11 settembre restituisce lo stesso esito. Non è un doppio invio.
+
+## 2. Incasso, poi `[CM]` — **superata**
+
+```
+09:20:48.279  RX <  {"response":"CM",..., "errorCode":"OK", "committedAmout":0.0}      <- accettazione
+09:20:48.287  TX >  CM
+09:20:48.799  RX <  {"response":"CM",..., "errorCode":"",   "committedAmout":800.0}    <- esito
+09:20:48.844  +     response=CM  incassato=800,00  trattenuto=800,00 (controllo committedAmount=800,00)
+```
+
+**D1 non è tornato:** la libreria chiude sul secondo frame, quello con `errorCode` vuoto, e legge
+800,00 dove prima avrebbe letto 0,00. `collectedAmount` e `committedAmount` coincidono, quindi la
+diagnostica di controllo non segnala niente. Identico in Compose (`trattenuto=800.0`).
+
+Confermata anche la forma dei due frame descritta nell'esito: **ciò che li distingue è `errorCode`**
+(`OK` nell'accettazione, vuoto nell'esito). Nel JSON del simulatore il campo si chiama
+`committedAmout`, senza la *n*: è un refuso del protocollo, e la libreria lo mappa già così.
+Nessun `CM` in ritardo fra gli orfani in questa sessione.
+
+## 3. Seconda chiusura sullo stesso incasso — **superata**
+
+`[CM]` e subito dopo `[AN]`, con il commit ancora in volo:
+
+```
+WinForms  09:21:19.726  TX >  CM
+          09:21:20.073  i     [AN] annullo
+          09:21:20.091  ERR!  Chiusura dell'incasso gia' richiesta con CM: 'AN' non inviato
+Compose   09:29:18.262  ERR!  Chiusura dell'incasso gia' richiesta con CM: 'AN' non inviato
+```
+
+**Nessun `TX > AN`**: il secondo comando non è stato trasmesso. Il `CM` è poi andato a buon fine.
+
+## 4. Un altro comando a incasso aperto — **superata**
+
+`[ST] Richiesta situazione` premuto con un incasso da 9.000 € aperto:
+
+```
+09:22:22.891  i     [ST] situazione
+09:22:22.894  i     'ST' NON inviato: incasso aperto, la macchina accetta solo AN e CM
+09:22:22.920  ERR!  Incasso aperto: 'ST' non inviato, durante l'incasso la macchina accetta solo AN e CM
+```
+
+Nessun `TX > ST`, incasso rimasto aperto e chiuso dopo con `[AN]` (denaro restituito). Identico in
+Compose. Il blocco degli invii laterali regge anche premendo i pulsanti a mano.
+
+## 5. Frame orfani nel log — **superata**
+
+Sessione di ricarica mista (`VS`) con l'opzione *invia i parziali al client*:
+
+```
+09:23:25.424  TX >  VS
+09:23:26.223  i     messaggio non atteso da nessuno (nessun comando in corso): {"response":"p",...}
+09:23:26.224  ERR!  frame orfano (nessuna attesa lo riconosce): {"response":"p","collectedAmount":1002.0,...}
+```
+
+Tre frame orfani per banco, **con gli importi dentro** (`collectedAmount` che sale 1002, 1004,
+1006). È esattamente il canale su cui in Giano andranno salvati gli importi che oggi si
+perderebbero: Decisione 2 di `decisioni-innesto-giano.md`.
+
+---
+
+## Tre cose emerse, da tenere presenti
+
+- **La riga `TX >` può comparire dopo la risposta.** In C# l'evento `CommandSent` è sollevato
+  *dopo* la scrittura sul socket (`PagAmicoClient.cs:262`), e su `127.0.0.1` la risposta a volte
+  viene letta prima: nel log del `[CM]` la riga `RX` è a `.279` e il `TX > CM` a `.287`. È solo
+  l'ordine delle righe, non dei byte, ma leggendo un log confonde — e confonderà di più con il Tap
+  in mezzo. Da valutare se spostare l'evento prima della scrittura, nelle due librerie insieme.
+- **I due banchi formattano gli importi in modo diverso**: WinForms `800,00` (formato `0.00`),
+  Compose `800.0` (il `toString` di `BigDecimal`). Divergenza dei banchi, non delle librerie;
+  costa poco uniformarla.
+- **Un incasso rifiutato si riconosce.** Un tentativo con importo malformato è partito come
+  `IN000000` e la macchina ha risposto `CMD ERROR`: la libreria ha chiuso con
+  `Incasso 'IN000000' rifiutato: CMD ERROR`, cioè `PagAmicoRejectedException`. È il predicato in due
+  fasi del punto 2 delle correzioni dell'11 settembre, visto sul simulatore vero: prima dell'`OK` un
+  testo significa incasso rifiutato.
+
+## Stato lasciato al simulatore
+
+Le prove hanno trattenuto 1.400 € con i due `CM` (800 + 600) e incassato 3.000 € con un incasso
+completato per intero; tutti gli `[AN]` hanno restituito il denaro. Il simulatore segnala ora
+`Monete sottoscorta` e `Troppe banconote: eseguire scarico banconote`: per rimetterlo in ordine
+basta `Fill` (monete) o uno scarico banconote dal pannello.
+
+## Che cosa resta del ramo 1
+
+Niente: i punti 1-6 sono chiusi. **Non** sono state toccate le cose che vanno dopo le prove sulla
+macchina vera: default del terminatore, pausa di 80 ms, timeout di 5 minuti (D2), chiusura
+dell'incasso su `ER` dopo l'`OK`.

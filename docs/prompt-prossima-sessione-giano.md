@@ -7,8 +7,12 @@
 > keepalive TCP regolato (10 s / 2 s / 5 sonde), test offline **170 in C# e 171 in Kotlin**, Tap con
 > comandi dalla console, banco Kotlin impacchettato. Decisioni per Giano: **replicare il VNE** con il
 > log degli importi, Decisione 1 rimandata alle prove 4 e 5 (`docs/decisioni-innesto-giano.md`). Le
-> prove sulla macchina di PayPrint si preparano con `docs/guida-prove-macchina-payprint.pdf`. Il
-> resto di questa sezione è la situazione all'11 settembre.
+> prove sulla macchina di PayPrint si preparano con `docs/guida-prove-macchina-payprint.pdf`.
+>
+> **16 settembre: il ramo 1 è chiuso.** Le cinque prove a mano sono state eseguite sul simulatore
+> nei due banchi e **superate tutte**, `cancelCurrent()` è stata tolta dal banco Compose: verbale in
+> `prove-banchi-ramo1-2026-09-16.md`. Restano il ramo 2 (le prove sulla macchina) e il ramo 3 (le
+> decisioni contabili). Il resto di questa sezione è la situazione all'11 settembre.
 
 **PayPrint ha risposto** (11 settembre, `docs/risposta-payprint-2026-09-11.md`), e l'analisi
 verificata della risposta sta in **`docs/esito-risposta-payprint.md`**. Leggerlo è il primo passo di
@@ -47,7 +51,7 @@ Quindi la prossima sessione può essere una di tre cose:
 
 | Se… | Allora la sessione è |
 | --- | --- |
-| nessuna condizione — si può fare sempre | **provare a mano i due banchi**: ramo 1 (piccolo) |
+| ~~nessuna condizione~~ — **fatto il 16 settembre** | ~~provare a mano i due banchi: ramo 1~~ (`prove-banchi-ramo1-2026-09-16.md`) |
 | c'è il via libera per il collegamento alla macchina di PayPrint, o è arrivata la nostra | **le prove**: ramo 2 |
 | le decisioni contabili sono prese | **disegno dell'adattatore**, poi codice: ramo 3 |
 
@@ -137,15 +141,15 @@ nuova va in tutti e tre i file `StringResources`.
 mai il PDF.
 ---
 
-### RAMO 1 — provare a mano i due banchi
+### RAMO 1 — provare a mano i due banchi — **FATTO il 16 settembre**
 
-*(usa questo quando non c'è altro di pronto: non dipende da nessuno. I punti 1-8 del capitolo 3
-dell'esito e la seconda passata sui test sono fatti dall'11 settembre: non rifarli)*
+*(le cinque prove sono state eseguite sul simulatore nei due banchi e superate tutte, e il punto 6
+è chiuso: il verbale, con i messaggi visti riga per riga e tre cose emerse, è in
+`prove-banchi-ramo1-2026-09-16.md`. Qui sotto resta l'elenco, come riferimento per rifarle)*
 
-I due banchi (WinForms e Compose) compilano, ma dopo le modifiche dell'11 settembre nessuno li ha
-aperti. La scheda pronta da eseguire, con i messaggi attesi riga per riga, è
-`prove-banchi-ramo1-2026-09-16.md`; il **punto 6 è già fatto** (16 settembre: `cancelCurrent()`
-tolta dal banco Compose). Sul simulatore, in tutti e due:
+Sul simulatore, in tutti e due i banchi. **Il cliente virtuale inserisce circa 200 € al secondo:**
+senza un importo alto (3.000-9.000 €) l'incasso si chiude da solo prima che si riesca a premere un
+pulsante, e le prove 1-4 non provano quello che devono.
 
 1. Un incasso, poi `[AN]` a incasso aperto: deve comparire l'esito dell'incasso.
 2. Un incasso, poi `[CM]`: il trattenuto letto da `collectedAmount`.
@@ -154,7 +158,7 @@ trasmesso.
 4. Un altro comando a incasso aperto (stato, display): errore di incasso aperto, nulla trasmesso.
 5. I frame orfani nel log (per esempio i parziali di una ricarica `VS`).
 6. ~~Nel banco Compose `cancelCurrent()` non la usa più nessuno: toglierla o ricollegarla.~~
-   **Fatto il 16 settembre**: tolta, il `[AN]` usa `cancelOperation()`.
+   tolta, il `[AN]` usa `cancelOperation()`.
 
 **Non** toccare ancora: il default del terminatore, la pausa, il timeout (D2), la chiusura
 dell'incasso su `ER` dopo l'`OK`. Quelli vanno dopo le prove.
